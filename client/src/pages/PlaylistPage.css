@@ -1,0 +1,335 @@
+.playlist-page {
+    padding-bottom: 32px;
+  }
+  
+  .playlist-header {
+    display: flex;
+    align-items: flex-end;
+    padding: 32px;
+    background: linear-gradient(transparent 0, rgba(0, 0, 0, 0.5) 100%);
+  }
+  
+  .playlist-cover {
+    margin-right: 24px;
+    flex-shrink: 0;
+  }
+  
+  .playlist-cover {
+    margin-right: 24px;
+    flex-shrink: 0;
+  }
+  
+  .playlist-image {
+    width: 232px;
+    height: 232px;
+    object-fit: cover;
+    box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
+  }
+  
+  .playlist-info {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .playlist-type {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  
+  .playlist-name {
+    font-size: 96px;
+    font-weight: 900;
+    margin: 0 0 8px;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .playlist-description {
+    font-size: 16px;
+    color: #b3b3b3;
+    margin-bottom: 8px;
+  }
+  
+  .playlist-meta {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #b3b3b3;
+  }
+  
+  .playlist-owner {
+    font-weight: 700;
+    color: #fff;
+  }
+  
+  .meta-separator {
+    margin: 0 4px;
+  }
+  
+  .playlist-actions {
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .play-all-button {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #1db954;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .play-all-button:hover {
+    transform: scale(1.05);
+    background-color: #1ed760;
+  }
+  
+  .play-all-button svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .playlist-tracks {
+    padding: 0 32px;
+  }
+  
+  .tracks-header {
+    display: grid;
+    grid-template-columns: 16px 4fr 2fr 2fr 1fr;
+    gap: 16px;
+    padding: 0 16px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #b3b3b3;
+    font-size: 14px;
+    font-weight: 400;
+  }
+  
+  .duration-icon {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+  
+  .tracks-list {
+    margin-top: 16px;
+  }
+  
+  .track-item {
+    display: grid;
+    grid-template-columns: 16px 4fr 2fr 2fr 1fr;
+    gap: 16px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    font-size: 14px;
+  }
+  
+  .track-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .track-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  
+  .track-index {
+    display: block;
+  }
+  
+  .track-play-button {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: none;
+    border: none;
+    color: #fff;
+    display: none;
+    padding: 0;
+    cursor: pointer;
+  }
+  
+  .track-play-button svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .track-item:hover .track-index {
+    display: none;
+  }
+  
+  .track-item:hover .track-play-button {
+    display: block;
+  }
+  
+  .track-title {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+  
+  .track-image {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    margin-right: 16px;
+  }
+  
+  .track-info {
+    min-width: 0;
+  }
+  
+  .track-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .track-artist {
+    color: #b3b3b3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .track-album,
+  .track-date-added {
+    color: #b3b3b3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+  }
+  
+  .track-duration {
+    color: #b3b3b3;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  
+  .playlist-loading,
+  .playlist-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 300px;
+  }
+  
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #1db954;
+    animation: spin 1s ease-in-out infinite;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .playlist-error h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  
+  .playlist-error p {
+    font-size: 16px;
+    color: #b3b3b3;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 992px) {
+    .playlist-name {
+      font-size: 72px;
+    }
+  
+    .tracks-header,
+    .track-item {
+      grid-template-columns: 16px 4fr 2fr 1fr;
+    }
+  
+    .track-date-added {
+      display: none;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .playlist-header {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 16px;
+    }
+  
+    .playlist-cover {
+      margin-right: 0;
+      margin-bottom: 16px;
+    }
+  
+    .playlist-image {
+      width: 192px;
+      height: 192px;
+    }
+  
+    .playlist-name {
+      font-size: 48px;
+    }
+  
+    .playlist-actions {
+      padding: 16px;
+    }
+  
+    .playlist-tracks {
+      padding: 0 16px;
+    }
+  
+    .tracks-header,
+    .track-item {
+      grid-template-columns: 16px 4fr 1fr;
+    }
+  
+    .track-album {
+      display: none;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .playlist-image {
+      width: 160px;
+      height: 160px;
+    }
+  
+    .playlist-name {
+      font-size: 32px;
+    }
+  
+    .tracks-header,
+    .track-item {
+      grid-template-columns: 16px 4fr auto;
+      gap: 8px;
+    }
+  }
+  
+  

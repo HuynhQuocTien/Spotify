@@ -1,0 +1,317 @@
+.search-page {
+    padding: 16px 32px 32px;
+  }
+  
+  .browse-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 24px;
+  }
+  
+  .category-item {
+    position: relative;
+    border-radius: 8px;
+    aspect-ratio: 1;
+    padding: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  
+  .category-item:hover {
+    transform: scale(1.02);
+  }
+  
+  .category-name {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    font-size: 24px;
+    font-weight: 700;
+  }
+  
+  .search-loading {
+    display: flex;
+    justify-content: center;
+    padding: 48px 0;
+  }
+  
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #1db954;
+    animation: spin 1s ease-in-out infinite;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .search-results {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  
+  .search-section {
+    margin-bottom: 32px;
+  }
+  
+  .search-section-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  
+  .top-result {
+    background-color: #181818;
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+    transition: background-color 0.3s ease;
+  }
+  
+  .top-result:hover {
+    background-color: #282828;
+  }
+  
+  .top-result-image {
+    width: 92px;
+    height: 92px;
+    object-fit: cover;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  }
+  
+  .top-result-artist .top-result-image {
+    border-radius: 50%;
+  }
+  
+  .top-result-name {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  
+  .top-result-type,
+  .top-result-artist {
+    font-size: 14px;
+    color: #b3b3b3;
+  }
+  
+  .play-button {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #1db954;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .play-button svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .top-result:hover .play-button {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .tracks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .track-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .track-item:hover {
+    background-color: #282828;
+  }
+  
+  .track-image {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    margin-right: 16px;
+  }
+  
+  .track-info {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .track-name {
+    display: block;
+    font-size: 16px;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .track-artist {
+    display: block;
+    font-size: 14px;
+    color: #b3b3b3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .track-play-button {
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: none;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .track-play-button svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .track-item:hover .track-play-button {
+    opacity: 1;
+  }
+  
+  .search-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 24px;
+  }
+  
+  .search-grid-item {
+    background-color: #181818;
+    border-radius: 8px;
+    padding: 16px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .search-grid-item:hover {
+    background-color: #282828;
+  }
+  
+  .search-grid-image-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  }
+  
+  .search-grid-image {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  
+  .artist-image {
+    border-radius: 50%;
+  }
+  
+  .search-grid-name {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .search-grid-type {
+    font-size: 14px;
+    color: #b3b3b3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 48px 0;
+  }
+  
+  .no-results h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  
+  .no-results p {
+    font-size: 16px;
+    color: #b3b3b3;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 1200px) {
+    .categories-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .search-results {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .categories-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .search-page {
+      padding: 16px;
+    }
+    
+    .categories-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .search-grid {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .categories-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  

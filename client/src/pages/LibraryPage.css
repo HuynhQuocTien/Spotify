@@ -1,0 +1,338 @@
+.library-page {
+    padding: 16px 32px 32px;
+  }
+  
+  .library-header {
+    position: sticky;
+    top: 64px;
+    background-color: rgba(18, 18, 18, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 16px 0;
+    margin-bottom: 24px;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  
+  .library-tabs {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .library-tab {
+    padding: 8px 16px;
+    border-radius: 20px;
+    background-color: transparent;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .library-tab:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .library-tab.active {
+    background-color: #fff;
+    color: #000;
+  }
+  
+  .library-actions {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .library-filter,
+  .library-sort {
+    position: relative;
+  }
+  
+  .filter-button {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .filter-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .filter-icon {
+    width: 16px;
+    height: 16px;
+    fill: #fff;
+  }
+  
+  .filter-menu {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    width: 240px;
+    background-color: #282828;
+    border-radius: 4px;
+    padding: 8px;
+    box-shadow: 0 16px 24px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+  }
+  
+  .filter-input-container {
+    position: relative;
+  }
+  
+  .search-icon {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    fill: #b3b3b3;
+  }
+  
+  .filter-input {
+    width: 100%;
+    height: 32px;
+    border-radius: 4px;
+    border: none;
+    background-color: #3e3e3e;
+    color: #fff;
+    padding: 0 8px 0 32px;
+    font-size: 14px;
+    outline: none;
+  }
+  
+  .sort-button {
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .sort-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .sort-text {
+    font-weight: 700;
+  }
+  
+  .sort-icon {
+    width: 16px;
+    height: 16px;
+    fill: #fff;
+  }
+  
+  .sort-menu {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    width: 180px;
+    background-color: #282828;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 16px 24px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+  }
+  
+  .sort-option {
+    width: 100%;
+    padding: 12px 16px;
+    background-color: transparent;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .sort-option:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .sort-option.active {
+    color: #1db954;
+  }
+  
+  .library-loading {
+    display: flex;
+    justify-content: center;
+    padding: 48px 0;
+  }
+  
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #1db954;
+    animation: spin 1s ease-in-out infinite;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .library-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .library-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .library-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .library-item-image-container {
+    position: relative;
+    width: 48px;
+    height: 48px;
+  }
+  
+  .library-item-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .artist-image {
+    border-radius: 50%;
+  }
+  
+  .library-play-button {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #1db954;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .library-play-button svg {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .library-item:hover .library-play-button {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .library-item-info {
+    min-width: 0;
+  }
+  
+  .library-item-name {
+    font-size: 16px;
+    font-weight: 400;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .library-item-details {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    color: #b3b3b3;
+  }
+  
+  .library-item-type,
+  .library-item-creator {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .library-item-date {
+    font-size: 14px;
+    color: #b3b3b3;
+    white-space: nowrap;
+  }
+  
+  .library-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 0;
+    text-align: center;
+  }
+  
+  .library-empty h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  
+  .library-empty p {
+    font-size: 16px;
+    color: #b3b3b3;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .library-page {
+      padding: 16px;
+    }
+    
+    .library-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .library-item {
+      grid-template-columns: auto 1fr;
+    }
+    
+    .library-item-date {
+      display: none;
+    }
+  }
+  
