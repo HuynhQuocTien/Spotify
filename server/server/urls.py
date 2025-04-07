@@ -16,7 +16,22 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.contrib import admin
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from music.views import ArtistViewSet, AlbumViewSet, SongViewSet, PlaylistViewSet, VideoViewSet
+from django.conf import settings
+from django.conf.urls.static import static
+
+router = DefaultRouter()
+router.register(r'artists', ArtistViewSet)
+router.register(r'albums', AlbumViewSet)
+router.register(r'songs', SongViewSet)
+router.register(r'playlists', PlaylistViewSet)
+router.register(r'videos', VideoViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-]
+    path('api/', include(router.urls)),
+    path('api/auth/', include('users.urls')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
