@@ -4,15 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7784712c-c114-4f41-843e-ce3b0b975991" name="Changes" comment="refactor models: reduce max_length for fields, update relationships, and add UserProfile model">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/music/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/music/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/music/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/music/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/urls.py" afterDir="false" />
+    <list default="true" id="7784712c-c114-4f41-843e-ce3b0b975991" name="Changes" comment="feat: Enhance music models and admin interface with Genre, Album, Song, and UserProfile management">
+      <change afterPath="$PROJECT_DIR$/music/migrations/0001_initial.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -118,7 +111,7 @@
       <workItem from="1744012544516" duration="148000" />
       <workItem from="1744012819996" duration="3285000" />
       <workItem from="1744022065869" duration="1475000" />
-      <workItem from="1744047546068" duration="1720000" />
+      <workItem from="1744047546068" duration="2602000" />
     </task>
     <task id="LOCAL-00001" summary="init server">
       <option name="closed" value="true" />
@@ -152,7 +145,23 @@
       <option name="project" value="LOCAL" />
       <updated>1744047639810</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="feat: Enhance music models and admin interface with Genre, Album, Song, and UserProfile management">
+      <option name="closed" value="true" />
+      <created>1744059372437</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1744059372437</updated>
+    </task>
+    <task id="LOCAL-00006" summary="feat: Enhance music models and admin interface with Genre, Album, Song, and UserProfile management">
+      <option name="closed" value="true" />
+      <created>1744059384049</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1744059384049</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -164,6 +173,7 @@
     <MESSAGE value="add initial server configuration and workspace settings" />
     <MESSAGE value="add serializers for music models and update URL patterns" />
     <MESSAGE value="refactor models: reduce max_length for fields, update relationships, and add UserProfile model" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor models: reduce max_length for fields, update relationships, and add UserProfile model" />
+    <MESSAGE value="feat: Enhance music models and admin interface with Genre, Album, Song, and UserProfile management" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: Enhance music models and admin interface with Genre, Album, Song, and UserProfile management" />
   </component>
 </project>
