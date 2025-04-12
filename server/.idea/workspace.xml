@@ -4,8 +4,29 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7784712c-c114-4f41-843e-ce3b0b975991" name="Changes" comment="feat: Enhance music models and admin interface with Genre, Album, Song, and UserProfile management">
-      <change afterPath="$PROJECT_DIR$/music/migrations/0001_initial.py" afterDir="false" />
+    <list default="true" id="7784712c-c114-4f41-843e-ce3b0b975991" name="Changes" comment="push: db">
+      <change beforePath="$PROJECT_DIR$/../client/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../client/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/components/AppHeader.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/AppHeader.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/components/AppHeader.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/AppHeader.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/components/Player.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Player.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/components/Player.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Player.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/components/ProtectedRoute.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/ProtectedRoute.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/pages/Home.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/pages/Login.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/pages/Playlist.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/pages/Search.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/services/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/services/api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/services/firebase.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/styles/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/styles/main.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/music/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/music/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/music/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/music/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/routing.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/routing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/urls.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,6 +39,7 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Dockerfile" />
         <option value="Python Script" />
       </list>
     </option>
@@ -54,6 +76,7 @@
     &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.pycharm.django.structure.promotion.once.per.project&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;last_opened_file_path&quot;: &quot;/home/tien/Desktop/Spotify/server&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -111,7 +134,14 @@
       <workItem from="1744012544516" duration="148000" />
       <workItem from="1744012819996" duration="3285000" />
       <workItem from="1744022065869" duration="1475000" />
-      <workItem from="1744047546068" duration="2602000" />
+      <workItem from="1744047546068" duration="4975000" />
+      <workItem from="1744074126449" duration="615000" />
+      <workItem from="1744087386426" duration="861000" />
+      <workItem from="1744098538307" duration="16144000" />
+      <workItem from="1744174003004" duration="2158000" />
+      <workItem from="1744286366880" duration="6299000" />
+      <workItem from="1744387795418" duration="15263000" />
+      <workItem from="1744476953622" duration="6782000" />
     </task>
     <task id="LOCAL-00001" summary="init server">
       <option name="closed" value="true" />
@@ -161,11 +191,102 @@
       <option name="project" value="LOCAL" />
       <updated>1744059384049</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="feat: Update workspace configuration to reflect enhancements in music models and admin interface">
+      <option name="closed" value="true" />
+      <created>1744059394391</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1744059394391</updated>
+    </task>
+    <task id="LOCAL-00008" summary="feat: Add Docker support with PostgreSQL and environment configuration">
+      <option name="closed" value="true" />
+      <created>1744060618406</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1744060618406</updated>
+    </task>
+    <task id="LOCAL-00009" summary="feat: Add Docker configuration with PostgreSQL support and environment setup">
+      <option name="closed" value="true" />
+      <created>1744108825344</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1744108825344</updated>
+    </task>
+    <task id="LOCAL-00010" summary="feat: Add Docker configuration with PostgreSQL support and environment setup">
+      <option name="closed" value="true" />
+      <created>1744110109428</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1744110109428</updated>
+    </task>
+    <task id="LOCAL-00011" summary="feat: Add Docker configuration with PostgreSQL support and environment setup">
+      <option name="closed" value="true" />
+      <created>1744110118679</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1744110118679</updated>
+    </task>
+    <task id="LOCAL-00012" summary="fix: Update Django and pymongo versions in requirements.txt">
+      <option name="closed" value="true" />
+      <created>1744309143257</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1744309143257</updated>
+    </task>
+    <task id="LOCAL-00013" summary="feat: Add ChatHistory model to store user chat messages and responses">
+      <option name="closed" value="true" />
+      <created>1744309202691</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1744309202691</updated>
+    </task>
+    <task id="LOCAL-00014" summary="feat: Register ChatHistory model in admin with custom display and filtering">
+      <option name="closed" value="true" />
+      <created>1744398065395</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1744398065395</updated>
+    </task>
+    <task id="LOCAL-00015" summary="uppp">
+      <option name="closed" value="true" />
+      <created>1744398127227</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1744398127227</updated>
+    </task>
+    <task id="LOCAL-00016" summary="push: db">
+      <option name="closed" value="true" />
+      <created>1744401126603</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1744401126603</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial commit" />
@@ -174,6 +295,14 @@
     <MESSAGE value="add serializers for music models and update URL patterns" />
     <MESSAGE value="refactor models: reduce max_length for fields, update relationships, and add UserProfile model" />
     <MESSAGE value="feat: Enhance music models and admin interface with Genre, Album, Song, and UserProfile management" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: Enhance music models and admin interface with Genre, Album, Song, and UserProfile management" />
+    <MESSAGE value="feat: Update workspace configuration to reflect enhancements in music models and admin interface" />
+    <MESSAGE value="feat: Add Docker support with PostgreSQL and environment configuration" />
+    <MESSAGE value="feat: Add Docker configuration with PostgreSQL support and environment setup" />
+    <MESSAGE value="fix: Update Django and pymongo versions in requirements.txt" />
+    <MESSAGE value="feat: Add ChatHistory model to store user chat messages and responses" />
+    <MESSAGE value="feat: Register ChatHistory model in admin with custom display and filtering" />
+    <MESSAGE value="uppp" />
+    <MESSAGE value="push: db" />
+    <option name="LAST_COMMIT_MESSAGE" value="push: db" />
   </component>
 </project>

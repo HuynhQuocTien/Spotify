@@ -1,18 +1,59 @@
+import threading
+
+from django.conf import settings
+from django.core.mail import send_mail
 from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from .models import Genre, Artist, Album, Song, Playlist, UserProfile
+from .models import Genre, Artist, Album, Song, Playlist, UserProfile, ChatHistory, PasswordResetOTP
 from .serializers import (
     GenreSerializer, ArtistSerializer, AlbumSerializer,
     SongSerializer, PlaylistSerializer, UserProfileSerializer,
-    CustomTokenObtainPairSerializer
+    CustomTokenObtainPairSerializer, ChatHistorySerializer, ForgotPasswordSerializer, VerifyOTPSerializer,
+    ResetPasswordSerializer
 )
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from transformers import pipeline
+import threading
 
+chatbot = None
+
+
+def load_model():
+    global chatbot
+    # chatbot = pipeline("text-generation", model="gpt2")
+
+
+threading.Thread(target=load_model).start()
+
+
+class ChatAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if not chatbot:
+            return Response({"error": "AI model is loading"}, status=503)
+
+        message = request.data.get("message")
+        if not message:
+            return Response({"error": "Message is required"}, status=400)
+
+        # Xử lý message với AI
+        response = chatbot(message, max_length=100, do_sample=True)[0]['generated_text']
+
+        # Lưu lịch sử chat vào database
+        chat = ChatHistory.objects.create(
+            user=request.user,
+            message=message,
+            response=response,
+            read=False
+        )
+        serializer = ChatHistorySerializer(chat)
+        return Response(serializer.data)
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -148,4 +189,117 @@ class RegisterView(APIView):
         return Response(
             {'message': 'User created successfully'},
             status=status.HTTP_201_CREATED
+        )
+
+
+class ForgotPasswordView(APIView):
+    def post(self, request):
+        serializer = ForgotPasswordSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        email = serializer.validated_data['email']
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Email không tồn tại trong hệ thống'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Tạo OTP và gửi email (chạy trong thread riêng)
+        def send_otp_email():
+            otp_obj = PasswordResetOTP.objects.create(user=user)
+            subject = 'Mã OTP đặt lại mật khẩu'
+            message = f'Mã OTP của bạn là: {otp_obj.otp}. Mã có hiệu lực trong 15 phút.'
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+            )
+
+        threading.Thread(target=send_otp_email).start()
+
+        return Response(
+            {'message': 'Mã OTP đã được gửi đến email của bạn'},
+            status=status.HTTP_200_OK
+        )
+
+
+class VerifyOTPView(APIView):
+    def post(self, request):
+        serializer = VerifyOTPSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        email = serializer.validated_data['email']
+        otp = serializer.validated_data['otp']
+
+        try:
+            user = User.objects.get(email=email)
+            otp_obj = PasswordResetOTP.objects.filter(
+                user=user,
+                otp=otp,
+                is_used=False
+            ).latest('created_at')
+        except (User.DoesNotExist, PasswordResetOTP.DoesNotExist):
+            return Response(
+                {'error': 'Mã OTP không hợp lệ'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not otp_obj.is_valid():
+            return Response(
+                {'error': 'Mã OTP đã hết hạn hoặc đã sử dụng'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response(
+            {'message': 'Mã OTP hợp lệ'},
+            status=status.HTTP_200_OK
+        )
+
+
+class ResetPasswordView(APIView):
+    def post(self, request):
+        serializer = ResetPasswordSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        email = serializer.validated_data['email']
+        otp = serializer.validated_data['otp']
+        new_password = serializer.validated_data['new_password']
+
+        try:
+            user = User.objects.get(email=email)
+            otp_obj = PasswordResetOTP.objects.filter(
+                user=user,
+                otp=otp,
+                is_used=False
+            ).latest('created_at')
+        except (User.DoesNotExist, PasswordResetOTP.DoesNotExist):
+            return Response(
+                {'error': 'Mã OTP không hợp lệ'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not otp_obj.is_valid():
+            return Response(
+                {'error': 'Mã OTP đã hết hạn hoặc đã sử dụng'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Cập nhật mật khẩu mới
+        user.set_password(new_password)
+        user.save()
+
+        # Đánh dấu OTP đã sử dụng
+        otp_obj.is_used = True
+        otp_obj.save()
+
+        return Response(
+            {'message': 'Đặt lại mật khẩu thành công'},
+            status=status.HTTP_200_OK
         )

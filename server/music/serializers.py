@@ -1,8 +1,10 @@
 from rest_framework import serializers
-from .models import Genre, Artist, Album, Song, Playlist, UserProfile
+
+from .models import Genre, Artist, Album, Song, Playlist, UserProfile, ChatHistory
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
+from mutagen.mp3 import MP3
+from django.db import models
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,14 +31,18 @@ class AlbumSerializer(serializers.ModelSerializer):
 
 class SongSerializer(serializers.ModelSerializer):
     album = AlbumSerializer()
-    duration = serializers.SerializerMethodField()
+    audio_file = models.FileField(upload_to='songs/')
 
     class Meta:
         model = Song
         fields = '__all__'
 
-    def get_duration(self, obj):
-        return obj.get_duration()
+    def get_duration(self):
+        try:
+            audio = MP3(self.audio_file.path)
+            return int(audio.info.length)  # duration in seconds
+        except Exception as e:
+            return None
 
 
 class PlaylistSerializer(serializers.ModelSerializer):
@@ -74,3 +80,20 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['email'] = user.email
 
         return token
+
+class ChatHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChatHistory
+        fields = ['id', 'message', 'response', 'timestamp', 'read']
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+class VerifyOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField(max_length=6)
+
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField(max_length=6)
+    new_password = serializers.CharField(min_length=6)
