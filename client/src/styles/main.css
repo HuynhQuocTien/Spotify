@@ -99,7 +99,7 @@ body {
     background-color: #181818;
     border-top: 1px solid #282828;
     padding: 16px;
-    height: 80px;
+    height: 100px;
   }
   
   .song-info {
@@ -133,7 +133,7 @@ body {
   
   .player-controls {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
   }
   

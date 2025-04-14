@@ -103,6 +103,7 @@
   /* Player Controls */
   .player-controls {
     display: flex;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
     gap: 16px;
@@ -111,7 +112,7 @@
   
   .shuffle-button,
   .prev-button,
-  .play-button,
+  .play-btn,
   .next-button,
   .repeat-button {
     background: none;
@@ -127,21 +128,18 @@
   .shuffle-button svg,
   .prev-button svg,
   .next-button svg,
-  .repeat-button svg {
+  .repeat-button svg,
+  .play-btn svg{
     width: 16px;
     height: 16px;
   }
-  
-  .play-button svg {
-    width: 32px;
-    height: 32px;
-  }
-  
+
   .shuffle-button:hover,
   .prev-button:hover,
-  .play-button:hover,
+  .play-btn:hover,
   .next-button:hover,
-  .repeat-button:hover {
+  .repeat-button:hover
+  .play-btn:hover {
     color: #fff;
     transform: scale(1.05);
   }

@@ -3,14 +3,16 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import Section from "../components/Section"
+import api from "../services/api"
 import "./HomePage.css"
 
 const HomePage = () => {
   const [greeting, setGreeting] = useState("")
-  const [recentlyPlayed, setRecentlyPlayed] = useState([])
-  const [topPlaylists, setTopPlaylists] = useState([])
-  const [madeForYou, setMadeForYou] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [artists, setArtists] = useState([])
+  const [albums, setAlbums] = useState([])
+  const [songs, setSongs] = useState([])
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     // Set greeting based on time of day
@@ -22,160 +24,79 @@ const HomePage = () => {
     } else {
       setGreeting("Good evening")
     }
+    const formatArtist = (artist) => ({
+      id: artist.id,
+      name: artist.name,
+      type: "artist",
+      image: artist.image || "/placeholder-artist.svg",
+      description: "Artist"
+    })
 
-    // Fetch data (mock data for now)
+    const formatAlbum = (album) => ({
+      id: album.id,
+      name: album.title,
+      type: "album",
+      image: album.cover_image || "/placeholder-album.svg",
+      description: `By ${album.artist?.name || "Various Artists"}`
+    })
+
+    const formatSong = (song) => ({
+      id: song.id,
+      name: song.title,
+      type: "song",
+      image: song.image || "/placeholder-song.svg",
+      audio: song.audio_file,
+      description: `By ${song.album.artist.name || "Unknown"}`
+    })
+
+    // Fetch data
     const fetchData = async () => {
       try {
-        setLoading(true)
+        setIsLoaded(true)
+        setError(null)
 
-        // In a real app, these would be API calls
-        await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulate API delay
-
-        setRecentlyPlayed([
-          {
-            id: "1",
-            name: "Liked Songs",
-            type: "playlist",
-            images: [{ url: "/placeholder.svg?height=80&width=80" }],
-            owner: { display_name: "You" },
-          },
-          {
-            id: "2",
-            name: "Discover Weekly",
-            type: "playlist",
-            images: [{ url: "/placeholder.svg?height=80&width=80" }],
-            owner: { display_name: "Spotify" },
-          },
-          {
-            id: "3",
-            name: "Daily Mix 1",
-            type: "playlist",
-            images: [{ url: "/placeholder.svg?height=80&width=80" }],
-            owner: { display_name: "Spotify" },
-          },
-          {
-            id: "4",
-            name: "Release Radar",
-            type: "playlist",
-            images: [{ url: "/placeholder.svg?height=80&width=80" }],
-            owner: { display_name: "Spotify" },
-          },
-          {
-            id: "5",
-            name: "Chill Hits",
-            type: "playlist",
-            images: [{ url: "/placeholder.svg?height=80&width=80" }],
-            owner: { display_name: "Spotify" },
-          },
-          {
-            id: "6",
-            name: "Rock Classics",
-            type: "playlist",
-            images: [{ url: "/placeholder.svg?height=80&width=80" }],
-            owner: { display_name: "Spotify" },
-          },
+        const [
+          artistsResponse,
+          albumsResponse,
+          songsResponse
+        ] = await Promise.all([
+          api.getArtists(),
+          api.getAlbums(),
+          api.getSongs()
         ])
+        setArtists(artistsResponse.data.map(formatArtist))
+        setAlbums(albumsResponse.data.map(formatAlbum))
+        setSongs(songsResponse.data.map(formatSong))
 
-        setTopPlaylists([
-          {
-            id: "7",
-            name: "Today's Top Hits",
-            description: "Jung Kook is on top of the Hottest 50!",
-            type: "playlist",
-            images: [{ url: "/placeholder.svg?height=300&width=300" }],
-            owner: { display_name: "Spotify" },
-          },
-          {
-            id: "8",
-            name: "RapCaviar",
-            description: "New music from Drake, Kendrick Lamar and more.",
-            type: "playlist",
-            images: [{ url: "/placeholder.svg?height=300&width=300" }],
-            owner: { display_name: "Spotify" },
-          },
-          {
-            id: "9",
-            name: "All Out 2010s",
-            description: "The biggest songs of the 2010s.",
-            type: "playlist",
-            images: [{ url: "/placeholder.svg?height=300&width=300" }],
-            owner: { display_name: "Spotify" },
-          },
-          {
-            id: "10",
-            name: "Rock Classics",
-            description: "Rock legends & epic songs that continue to inspire generations.",
-            type: "playlist",
-            images: [{ url: "/placeholder.svg?height=300&width=300" }],
-            owner: { display_name: "Spotify" },
-          },
-          {
-            id: "11",
-            name: "Chill Hits",
-            description: "Kick back to the best new and recent chill hits.",
-            type: "playlist",
-            images: [{ url: "/placeholder.svg?height=300&width=300" }],
-            owner: { display_name: "Spotify" },
-          },
-        ])
-
-        setMadeForYou([
-          {
-            id: "12",
-            name: "Daily Mix 1",
-            description: "The Weeknd, Drake, Kendrick Lamar and more",
-            type: "playlist",
-            images: [{ url: "/placeholder.svg?height=300&width=300" }],
-            owner: { display_name: "Spotify" },
-          },
-          {
-            id: "13",
-            name: "Daily Mix 2",
-            description: "Taylor Swift, Olivia Rodrigo, Billie Eilish and more",
-            type: "playlist",
-            images: [{ url: "/placeholder.svg?height=300&width=300" }],
-            owner: { display_name: "Spotify" },
-          },
-          {
-            id: "14",
-            name: "Daily Mix 3",
-            description: "Post Malone, Justin Bieber, Ed Sheeran and more",
-            type: "playlist",
-            images: [{ url: "/placeholder.svg?height=300&width=300" }],
-            owner: { display_name: "Spotify" },
-          },
-          {
-            id: "15",
-            name: "Discover Weekly",
-            description: "Your weekly mixtape of fresh music. Enjoy new discoveries and deep cuts chosen just for you.",
-            type: "playlist",
-            images: [{ url: "/placeholder.svg?height=300&width=300" }],
-            owner: { display_name: "Spotify" },
-          },
-          {
-            id: "16",
-            name: "Release Radar",
-            description: "Catch all the latest music from artists you follow.",
-            type: "playlist",
-            images: [{ url: "/placeholder.svg?height=300&width=300" }],
-            owner: { display_name: "Spotify" },
-          },
-        ])
-
-        setLoading(false)
-      } catch (error) {
-        console.error("Error fetching home data:", error)
-        setLoading(false)
+        setIsLoaded(true)
+      } catch (err) {
+        console.error("Error fetching data:", err)
+        setError("Failed to load data. Please try again.")
+        setIsLoaded(false)
       }
     }
 
     fetchData()
   }, [])
 
-  if (loading) {
+  if (!isLoaded) {
     return (
       <div className="loading-container">
         <div className="loading-spinner"></div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <p className="error-message">{error}</p>
+        <button
+          className="retry-button"
+          onClick={() => window.location.reload()}
+        >
+          Retry
+        </button>
       </div>
     )
   }
@@ -184,30 +105,33 @@ const HomePage = () => {
     <div className="home-page">
       <h1 className="greeting-title">{greeting}</h1>
 
-      <div className="recently-played-grid">
-        {recentlyPlayed.map((item) => (
-          <Link key={item.id} to={`/${item.type}/${item.id}`} className="recently-played-item">
-            <div className="recently-played-image">
-              <img src={item.images[0].url || "/placeholder.svg"} alt={item.name} />
-            </div>
-            <div className="recently-played-info">
-              <span className="recently-played-name">{item.name}</span>
-            </div>
-            <button className="play-button">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 5.14v14l11-7-11-7z" fill="currentColor" />
-              </svg>
-            </button>
-          </Link>
-        ))}
-      </div>
 
-      <Section title="Your top mixes" items={madeForYou} seeAllLink="/genre/made-for-you" />
+      {artists.length > 0 && (
+        <Section
+          title="Popular Artists"
+          items={artists}
+          seeAllLink="/browse/artists"
+        />
+      )}
 
-      <Section title="Popular playlists" items={topPlaylists} seeAllLink="/genre/featured-playlists" />
+      {albums.length > 0 && (
+        <Section
+          title="New Albums"
+          items={albums}
+          seeAllLink="/browse/albums"
+        />
+      )}
+
+      {songs.length > 0 && (
+        <Section
+          title="Top Songs"
+          items={songs}
+          seeAllLink="/browse/songs"
+        />
+      )}
+
     </div>
   )
 }
 
 export default HomePage
-

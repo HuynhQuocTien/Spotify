@@ -4,29 +4,35 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7784712c-c114-4f41-843e-ce3b0b975991" name="Changes" comment="push: db">
-      <change beforePath="$PROJECT_DIR$/../client/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../client/index.html" afterDir="false" />
+    <list default="true" id="7784712c-c114-4f41-843e-ce3b0b975991" name="Changes" comment="feat: Implement ChatHistory model and password reset functionality with OTP">
       <change beforePath="$PROJECT_DIR$/../client/src/components/AppHeader.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/AppHeader.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/components/AppHeader.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/AppHeader.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/components/Player.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Player.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/components/Player.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Player.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/components/ProtectedRoute.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/ProtectedRoute.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/components/Section.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Section.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/components/Section.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Section.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/contexts/MusicPlayerContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/contexts/MusicPlayerContext.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/pages/ArtistPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/ArtistPage.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/pages/ArtistPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/ArtistPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/pages/Home.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/pages/HomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/HomePage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/pages/Login.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/pages/LoginPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/LoginPage.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/pages/LoginPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/LoginPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/pages/Playlist.jsx" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/pages/Search.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/routes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/routes.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/services/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/services/api.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/services/firebase.js" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/styles/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/styles/main.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/../client/vite.config.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/music/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/music/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/music/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/music/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/routing.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/routing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/urls.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,6 +65,9 @@
     &quot;accountId&quot;: &quot;03c74cb2-378e-434f-978a-8e89308d23be&quot;
   }
 }</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 3
@@ -141,7 +150,11 @@
       <workItem from="1744174003004" duration="2158000" />
       <workItem from="1744286366880" duration="6299000" />
       <workItem from="1744387795418" duration="15263000" />
-      <workItem from="1744476953622" duration="6782000" />
+      <workItem from="1744476953622" duration="10121000" />
+      <workItem from="1744549889578" duration="3134000" />
+      <workItem from="1744560092006" duration="5608000" />
+      <workItem from="1744594996192" duration="4821000" />
+      <workItem from="1744616695650" duration="6491000" />
     </task>
     <task id="LOCAL-00001" summary="init server">
       <option name="closed" value="true" />
@@ -271,7 +284,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744401126603</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="feat: Implement ChatHistory model and password reset functionality with OTP">
+      <option name="closed" value="true" />
+      <created>1744488603018</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1744488603018</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -303,6 +324,7 @@
     <MESSAGE value="feat: Register ChatHistory model in admin with custom display and filtering" />
     <MESSAGE value="uppp" />
     <MESSAGE value="push: db" />
-    <option name="LAST_COMMIT_MESSAGE" value="push: db" />
+    <MESSAGE value="feat: Implement ChatHistory model and password reset functionality with OTP" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: Implement ChatHistory model and password reset functionality with OTP" />
   </component>
 </project>

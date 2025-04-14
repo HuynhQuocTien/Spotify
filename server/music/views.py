@@ -1,8 +1,16 @@
+import os
 import threading
+from datetime import datetime
 
+import jwt
 from django.conf import settings
 from django.core.mail import send_mail
-from rest_framework import viewsets, status, permissions
+from django.db.models import Count
+from django.http import FileResponse, HttpResponse
+from urllib.parse import quote
+import requests
+from io import BytesIO
+from rest_framework import viewsets, status, permissions, generics
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
@@ -58,6 +66,20 @@ class ChatAPI(APIView):
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        # Get the access token
+        access_token = data['access']
+
+        # Decode the JWT token to get the expiration time
+        decoded_access_token = jwt.decode(access_token, options={"verify_exp": False})
+        expiration_time = datetime.utcfromtimestamp(decoded_access_token['exp'])
+
+        # Include expiration time in the response
+        data['expiration_time'] = expiration_time.strftime('%Y-%m-%d %H:%M:%S')
+
+        return data
+
 
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
@@ -78,6 +100,7 @@ class ArtistViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
+
 class AlbumViewSet(viewsets.ModelViewSet):
     queryset = Album.objects.all()
     serializer_class = AlbumSerializer
@@ -88,6 +111,11 @@ class AlbumViewSet(viewsets.ModelViewSet):
         album = self.get_object()
         songs = album.songs.all()
         serializer = SongSerializer(songs, many=True)
+        return Response(serializer.data)
+    @action(detail=False, methods=['get'])
+    def new_releases(self, request):
+        albums = Album.objects.order_by('-release_date')[:10]
+        serializer = self.get_serializer(albums, many=True)
         return Response(serializer.data)
 
 
@@ -103,6 +131,83 @@ class SongViewSet(viewsets.ModelViewSet):
         song.save()
         return Response({'status': 'play count incremented'})
 
+    @action(detail=False, methods=['get'])
+    def recent(self, request):
+        recent_songs = Song.objects.order_by('-created_at')[:20]
+        serializer = self.get_serializer(recent_songs, many=True)
+        return Response(serializer.data)
+
+
+
+class PlaySongView(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request, song_id):
+        song = get_object_or_404(Song, id=song_id)
+
+        # Tăng số lượt phát
+        song.plays += 1
+        song.save()
+
+        # Nếu có file audio trực tiếp
+        if song.audio_file:
+            file_path = song.audio_file.path
+            if os.path.exists(file_path):
+                response = FileResponse(open(file_path, 'rb'))
+                response['Content-Disposition'] = f'attachment; filename="{quote(song.title)}.mp3"'
+                return response
+
+        # Nếu có URL audio
+        elif song.audio_url:
+            try:
+                audio_response = requests.get(song.audio_url, stream=True)
+                if audio_response.status_code == 200:
+                    response = HttpResponse(
+                        BytesIO(audio_response.content),
+                        content_type=audio_response.headers['Content-Type']
+                    )
+                    response['Content-Disposition'] = f'attachment; filename="{quote(song.title)}.mp3"'
+                    return response
+            except Exception:
+                pass
+
+        return Response({'error': 'Audio file not available'}, status=404)
+
+
+class StreamSongView(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request, song_id):
+        song = get_object_or_404(Song, id=song_id)
+
+        # Tăng số lượt phát
+        song.plays += 1
+        song.save()
+
+        # Nếu có file audio trực tiếp
+        if song.audio_file:
+            file_path = song.audio_file.path
+            if os.path.exists(file_path):
+                response = FileResponse(open(file_path, 'rb'))
+                response['Content-Type'] = 'audio/mpeg'
+                response['Content-Disposition'] = f'inline; filename="{quote(song.title)}.mp3"'
+                return response
+
+        # Nếu có URL audio
+        elif song.audio_url:
+            try:
+                audio_response = requests.get(song.audio_url, stream=True)
+                if audio_response.status_code == 200:
+                    response = HttpResponse(
+                        BytesIO(audio_response.content),
+                        content_type='audio/mpeg'
+                    )
+                    response['Content-Disposition'] = f'inline; filename="{quote(song.title)}.mp3"'
+                    return response
+            except Exception:
+                pass
+
+        return Response({'error': 'Audio file not available'}, status=404)
 
 class PlaylistViewSet(viewsets.ModelViewSet):
     queryset = Playlist.objects.all()
@@ -127,10 +232,12 @@ class PlaylistViewSet(viewsets.ModelViewSet):
     def remove_song(self, request, pk=None):
         playlist = self.get_object()
         song_id = request.data.get('song_id')
-        song = get_object_or_404(Song, id=song_id)
-        playlist.songs.remove(song)
-        return Response({'status': 'song removed from playlist'})
-
+        try:
+            song = Song.objects.get(id=song_id)
+            playlist.songs.remove(song)
+            return Response({'status': 'song removed'})
+        except Song.DoesNotExist:
+            return Response({'error': 'Song not found'}, status=404)
 
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
@@ -140,22 +247,30 @@ class UserProfileView(APIView):
         serializer = UserProfileSerializer(profile)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['post'])
-    def add_favorite_song(self, request):
+    def put(self, request):
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        serializer = UserProfileSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def post(self, request, song_id=None):
+        if 'remove' in request.path:
+            return self.remove_favorite_song(request, song_id)
+        return self.add_favorite_song(request, song_id)
+
+    def add_favorite_song(self, request, song_id):
         profile = get_object_or_404(UserProfile, user=request.user)
-        song_id = request.data.get('song_id')
         song = get_object_or_404(Song, id=song_id)
         profile.favorite_songs.add(song)
-        return Response({'status': 'song added to favorites'})
+        return Response({'status': 'song added to favorites'}, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['post'])
-    def remove_favorite_song(self, request):
+    def remove_favorite_song(self, request, song_id):
         profile = get_object_or_404(UserProfile, user=request.user)
-        song_id = request.data.get('song_id')
         song = get_object_or_404(Song, id=song_id)
         profile.favorite_songs.remove(song)
-        return Response({'status': 'song removed from favorites'})
-
+        return Response({'status': 'song removed from favorites'}, status=status.HTTP_200_OK)
 
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -303,3 +418,78 @@ class ResetPasswordView(APIView):
             {'message': 'Đặt lại mật khẩu thành công'},
             status=status.HTTP_200_OK
         )
+
+
+class PlaylistTracksView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, playlist_id):
+        playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
+        tracks = playlist.songs.all()
+        serializer = SongSerializer(tracks, many=True)
+        return Response({
+            'tracks': serializer.data,
+            'total': tracks.count()
+        })
+
+class AlbumTracksView(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request, album_id):
+        album = get_object_or_404(Album, id=album_id)
+        tracks = album.songs.all()
+        serializer = SongSerializer(tracks, many=True)
+        return Response({
+            'tracks': serializer.data,
+            'total': tracks.count()
+        })
+
+class ArtistTopTracksView(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request, artist_id):
+        artist = get_object_or_404(Artist, id=artist_id)
+        tracks = Song.objects.filter(artists=artist).order_by('-plays')[:10]
+        serializer = SongSerializer(tracks, many=True)
+        return Response({
+            'tracks': serializer.data,
+            'total': len(tracks)
+        })
+
+
+class TopSongsView(generics.ListAPIView):
+    serializer_class = SongSerializer
+
+    def get_queryset(self):
+        return Song.objects.annotate(
+            play_count=Count('plays')
+        ).order_by('-play_count')[:50]
+
+
+class NewReleasesView(generics.ListAPIView):
+    serializer_class = AlbumSerializer
+
+    def get_queryset(self):
+        return Album.objects.order_by('-release_date')[:20]
+
+
+class FeaturedArtistsView(generics.ListAPIView):
+    serializer_class = ArtistSerializer
+
+    def get_queryset(self):
+        return Artist.objects.annotate(
+            song_count=Count('songs')
+        ).order_by('-song_count')[:10]
+
+class SearchView(APIView):
+    def get(self, request):
+        q = request.GET.get('q', '')
+        songs = Song.objects.filter(title__icontains=q)
+        albums = Album.objects.filter(title__icontains=q)
+        artists = Artist.objects.filter(name__icontains=q)
+
+        return Response({
+            'songs': SongSerializer(songs, many=True).data,
+            'albums': AlbumSerializer(albums, many=True).data,
+            'artists': ArtistSerializer(artists, many=True).data
+        })

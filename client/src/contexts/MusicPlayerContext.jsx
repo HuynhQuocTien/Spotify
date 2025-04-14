@@ -2,10 +2,8 @@
 
 import { createContext, useContext, useState, useEffect, useRef } from "react"
 
-// Create the context
 const MusicPlayerContext = createContext()
 
-// Custom hook to use the music player context
 export const useMusicPlayer = () => {
   const context = useContext(MusicPlayerContext)
   if (!context) {
@@ -23,12 +21,14 @@ export const MusicPlayerProvider = ({ children }) => {
   const [duration, setDuration] = useState(0)
   const [currentTime, setCurrentTime] = useState(0)
   const [progress, setProgress] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   // Queue management
   const [queue, setQueue] = useState([])
   const [history, setHistory] = useState([])
 
-  // Additional controls
+  // Playback modes
   const [shuffle, setShuffle] = useState(false)
   const [repeat, setRepeat] = useState("off") // 'off', 'all', 'one'
 
@@ -39,12 +39,32 @@ export const MusicPlayerProvider = ({ children }) => {
   useEffect(() => {
     audioRef.current = new Audio()
 
-    // Set up event listeners
+    const handleTimeUpdate = () => {
+      if (!audioRef.current) return
+      const current = audioRef.current.currentTime
+      const duration = audioRef.current.duration
+      setCurrentTime(current)
+      setProgress((current / duration) * 100 || 0)
+    }
+
+    const handleMetadataLoaded = () => {
+      if (!audioRef.current) return
+      setDuration(audioRef.current.duration)
+    }
+
+    const handleTrackEnd = () => {
+      if (repeat === "one") {
+        audioRef.current.currentTime = 0
+        audioRef.current.play().catch(console.error)
+      } else {
+        playNextTrack()
+      }
+    }
+
     audioRef.current.addEventListener("timeupdate", handleTimeUpdate)
     audioRef.current.addEventListener("ended", handleTrackEnd)
     audioRef.current.addEventListener("loadedmetadata", handleMetadataLoaded)
 
-    // Clean up event listeners
     return () => {
       if (audioRef.current) {
         audioRef.current.removeEventListener("timeupdate", handleTimeUpdate)
@@ -53,36 +73,54 @@ export const MusicPlayerProvider = ({ children }) => {
         audioRef.current.pause()
       }
     }
-  }, [])
+  }, [repeat])
 
-  // Update audio source when current track changes
+  useEffect(() => {
+    if (!audioRef.current || !currentTrack) return
+    
+    console.log("Current track:", currentTrack)
+    const playAudio = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+  
+        audioRef.current.src = currentTrack.audio || currentTrack.preview_url || ""
+  
+        // Không cần await load()
+        audioRef.current.load()
+  
+        if (isPlaying) {
+          await audioRef.current.play()
+        }
+      } catch (err) {
+        setError(err.message)
+        setIsPlaying(false)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+  
+    playAudio()
+  }, [currentTrack])
+  // Handle play/pause state changes
   useEffect(() => {
     if (!audioRef.current || !currentTrack) return
 
-    audioRef.current.src = currentTrack.preview_url || currentTrack.audio || ""
-    audioRef.current.load()
-
-    if (isPlaying) {
-      audioRef.current.play().catch((error) => {
-        console.error("Playback failed:", error)
+    const handlePlayback = async () => {
+      try {
+        if (isPlaying) {
+          await audioRef.current.play()
+        } else {
+          audioRef.current.pause()
+        }
+      } catch (err) {
+        setError(err.message)
         setIsPlaying(false)
-      })
+      }
     }
-  }, [currentTrack])
 
-  // Handle play/pause state changes
-  useEffect(() => {
-    if (!audioRef.current) return
-
-    if (isPlaying) {
-      audioRef.current.play().catch((error) => {
-        console.error("Playback failed:", error)
-        setIsPlaying(false)
-      })
-    } else {
-      audioRef.current.pause()
-    }
-  }, [isPlaying])
+    handlePlayback()
+  }, [isPlaying, currentTrack])
 
   // Handle volume changes
   useEffect(() => {
@@ -90,49 +128,35 @@ export const MusicPlayerProvider = ({ children }) => {
     audioRef.current.volume = isMuted ? 0 : volume
   }, [volume, isMuted])
 
-  // Event handlers
-  const handleTimeUpdate = () => {
-    if (!audioRef.current) return
-
-    const current = audioRef.current.currentTime
-    const duration = audioRef.current.duration
-
-    setCurrentTime(current)
-    setProgress((current / duration) * 100 || 0)
-  }
-
-  const handleMetadataLoaded = () => {
-    if (!audioRef.current) return
-    setDuration(audioRef.current.duration)
-  }
-
-  const handleTrackEnd = () => {
-    if (repeat === "one") {
-      // Repeat the current track
-      audioRef.current.currentTime = 0
-      audioRef.current.play().catch(console.error)
-    } else {
-      // Play next track
-      playNextTrack()
-    }
-  }
-
   // Player controls
-  const playTrack = (track, tracks = []) => {
-    if (currentTrack) {
-      // Add current track to history
-      setHistory((prev) => [currentTrack, ...prev.slice(0, 19)])
+  const playTrack = async (track, tracks = []) => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      
+      if (currentTrack) {
+        setHistory((prev) => [currentTrack, ...prev.slice(0, 19)])
+      }
+
+      setCurrentTrack({
+        ...track,
+        contextTracks: tracks.length > 0 ? tracks : track.contextTracks || []
+      })
+
+      // Update queue if context tracks are provided
+      if (tracks.length > 0 || track.contextTracks) {
+        const contextTracks = tracks.length > 0 ? tracks : track.contextTracks
+        const remainingTracks = contextTracks.filter(t => t.id !== track.id)
+        setQueue(shuffle ? shuffleArray([...remainingTracks]) : remainingTracks)
+      }
+      
+      setIsPlaying(true)
+    } catch (err) {
+      setError(err.message)
+      setIsPlaying(false)
+    } finally {
+      setIsLoading(false)
     }
-
-    setCurrentTrack(track)
-
-    // If tracks are provided, set them as the queue (excluding the current track)
-    if (tracks.length > 0) {
-      const remainingTracks = tracks.filter((t) => t.id !== track.id)
-      setQueue(shuffle ? shuffleArray([...remainingTracks]) : remainingTracks)
-    }
-
-    setIsPlaying(true)
   }
 
   const togglePlay = () => {
@@ -143,7 +167,7 @@ export const MusicPlayerProvider = ({ children }) => {
   const playNextTrack = () => {
     if (queue.length === 0) {
       if (repeat === "all" && history.length > 0) {
-        // If repeat all is enabled and we have history, restart from the beginning
+        // Restart from the beginning if repeat all is enabled
         const allTracks = [...history, currentTrack].reverse()
         playTrack(allTracks[0], allTracks.slice(1))
       } else {
@@ -155,13 +179,13 @@ export const MusicPlayerProvider = ({ children }) => {
     const nextTrack = queue[0]
     const newQueue = queue.slice(1)
 
-    setCurrentTrack(nextTrack)
-    setQueue(newQueue)
-    setIsPlaying(true)
-
     if (currentTrack) {
       setHistory((prev) => [currentTrack, ...prev.slice(0, 19)])
     }
+
+    setCurrentTrack(nextTrack)
+    setQueue(newQueue)
+    setIsPlaying(true)
   }
 
   const playPreviousTrack = () => {
@@ -203,14 +227,14 @@ export const MusicPlayerProvider = ({ children }) => {
   }
 
   const changeVolume = (newVolume) => {
-    setVolume(newVolume)
+    setVolume(Math.max(0, Math.min(1, newVolume)))
     setIsMuted(newVolume === 0)
   }
 
   const toggleShuffle = () => {
     setShuffle((prev) => {
       const newShuffle = !prev
-      if (newShuffle) {
+      if (newShuffle && queue.length > 0) {
         setQueue(shuffleArray([...queue]))
       }
       return newShuffle
@@ -233,7 +257,7 @@ export const MusicPlayerProvider = ({ children }) => {
     setQueue([])
   }
 
-  // Helper function to shuffle an array
+  // Helper functions
   const shuffleArray = (array) => {
     const newArray = [...array]
     for (let i = newArray.length - 1; i > 0; i--) {
@@ -243,7 +267,6 @@ export const MusicPlayerProvider = ({ children }) => {
     return newArray
   }
 
-  // Format time for display (e.g., 3:45)
   const formatTime = (timeInSeconds) => {
     if (isNaN(timeInSeconds)) return "0:00"
 
@@ -266,6 +289,8 @@ export const MusicPlayerProvider = ({ children }) => {
     history,
     shuffle,
     repeat,
+    isLoading,
+    error,
 
     // Player controls
     playTrack,
@@ -288,4 +313,3 @@ export const MusicPlayerProvider = ({ children }) => {
 }
 
 export default MusicPlayerProvider
-

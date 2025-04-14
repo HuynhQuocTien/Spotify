@@ -28,28 +28,23 @@ const Player = () => {
 
   const [showVolume, setShowVolume] = useState(false)
 
-  // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Space bar to toggle play/pause
       if (e.code === "Space" && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
         e.preventDefault()
         togglePlay()
       }
 
-      // Right arrow to skip to next track
       if (e.code === "ArrowRight" && e.ctrlKey) {
         e.preventDefault()
         playNextTrack()
       }
 
-      // Left arrow to go to previous track
       if (e.code === "ArrowLeft" && e.ctrlKey) {
         e.preventDefault()
         playPreviousTrack()
       }
 
-      // M to mute/unmute
       if (e.code === "KeyM" && e.ctrlKey) {
         e.preventDefault()
         toggleMute()
@@ -59,7 +54,6 @@ const Player = () => {
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [togglePlay, playNextTrack, playPreviousTrack, toggleMute])
-
   if (!currentTrack) {
     return (
       <div className="player-container empty">
@@ -84,9 +78,9 @@ const Player = () => {
     <div className="player-container">
       <div className="player-left">
         <div className="now-playing">
-          {currentTrack.album?.images?.[0]?.url && (
+          {currentTrack.image && (
             <img
-              src={currentTrack.album.images[0].url || "/placeholder.svg"}
+              src={currentTrack.image || "/placeholder.svg"}
               alt={currentTrack.name}
               className="track-artwork"
             />
@@ -95,7 +89,7 @@ const Player = () => {
             <div className="track-name">{currentTrack.name}</div>
             <div className="track-artist">{currentTrack.artists?.map((artist) => artist.name).join(", ")}</div>
           </div>
-          <button className="like-button">
+          <a className="like-button">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -107,7 +101,7 @@ const Player = () => {
             >
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
             </svg>
-          </button>
+          </a>
         </div>
       </div>
 
@@ -150,7 +144,7 @@ const Player = () => {
             </svg>
           </button>
 
-          <button className="play-button" onClick={togglePlay} title={isPlaying ? "Pause" : "Play"}>
+          <button className="play-btn" onClick={togglePlay} title={isPlaying ? "Pause" : "Play"}>
             {isPlaying ? (
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                 <rect x="6" y="4" width="4" height="16"></rect>
