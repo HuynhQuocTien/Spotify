@@ -72,3 +72,7 @@ npm run dev
 | **Frontend** | [http://localhost:5173](http://localhost:5173) |
 | **Backend API** | [http://localhost:8000](http://localhost:8000) |
 | **Trang Admin** | [http://localhost:8000/admin](http://localhost:8000/admin) |
+
+---
+
+**Lưu ý**: Nếu bạn gặp vấn đề hoặc cần hỗ trợ, vui lòng liên hệ qua email: `quoctien01062003@gmail.com`.
