@@ -34,19 +34,20 @@ cd Spotify
 
 ```bash
 cd server
-python -m venv venv
-source venv/bin/activate       # Trên Windows: venv\Scripts\activate
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 
 # Khởi tạo cơ sở dữ liệu
-python manage.py makemigrations
-python manage.py migrate
+python3 manage.py makemigrations
+python3 manage.py migrate
 
 # (Tuỳ chọn) Tạo tài khoản admin
-python manage.py createsuperuser
+python3 manage.py createsuperuser
 
 # Chạy server Django
-python manage.py runserver
+python3 manage.py runserver
+
 ```
 
 ### 3. Cài đặt Frontend (React + Vite)
