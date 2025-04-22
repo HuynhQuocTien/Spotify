@@ -30,25 +30,34 @@ git clone https://github.com/HuynhQuocTien/Spotify.git
 cd Spotify 
 ```
 
-### 2. Cài đặt Backend (Django)
+### 2. Cài đặt Backend (Django) on Linux 
+ SSH vào EC2 instance:
+    ```bash
+    ssh -i "your-key.pem" ubuntu@tien.
+    ```
+- Cài đặt Python và các công cụ cần thiết:
+    ```bash
+    sudo apt update
+    sudo apt install python3 python3-venv python3-pip -y
+    ```
+- Chạy Backend
+    ```bash
+        cd server
+        python3 -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
 
-```bash
-cd server
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+        # Khởi tạo cơ sở dữ liệu
+        python3 manage.py makemigrations
+        python3 manage.py migrate
 
-# Khởi tạo cơ sở dữ liệu
-python3 manage.py makemigrations
-python3 manage.py migrate
+        # (Tuỳ chọn) Tạo tài khoản admin
+        python3 manage.py createsuperuser
 
-# (Tuỳ chọn) Tạo tài khoản admin
-python3 manage.py createsuperuser
+        # Chạy server Django
+        python3 manage.py runserver
 
-# Chạy server Django
-python3 manage.py runserver
-
-```
+    ```
 
 ### 3. Cài đặt Frontend (React + Vite)
 
