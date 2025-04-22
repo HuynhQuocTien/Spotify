@@ -33,12 +33,12 @@ cd Spotify
 ### 2. Cài đặt Backend (Django) on Linux 
  SSH vào EC2 instance:
     ```bash
-    ssh -i "your-key.pem" ubuntu@tien.
+        ssh -i "your-key.pem" ubuntu@your-name
     ```
 - Cài đặt Python và các công cụ cần thiết:
     ```bash
-    sudo apt update
-    sudo apt install python3 python3-venv python3-pip -y
+        sudo apt update
+        sudo apt install python3 python3-venv python3-pip -y
     ```
 - Chạy Backend
     ```bash
