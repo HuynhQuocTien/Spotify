@@ -15,12 +15,12 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from .models import Genre, Artist, Album, Song, Playlist, UserProfile, ChatHistory, PasswordResetOTP, Video
+from .models import Genre, Artist, Album, Song, Playlist, UserProfile, ChatHistory, PasswordResetOTP, Video, UserAlbum
 from .serializers import (
     GenreSerializer, ArtistSerializer, AlbumSerializer,
     SongSerializer, PlaylistSerializer, UserProfileSerializer,
     CustomTokenObtainPairSerializer, ChatHistorySerializer, ForgotPasswordSerializer, VerifyOTPSerializer,
-    ResetPasswordSerializer, VideoSerializer
+    ResetPasswordSerializer, VideoSerializer, UserAlbumSerializer
 )
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
@@ -106,18 +106,45 @@ class AlbumViewSet(viewsets.ModelViewSet):
     serializer_class = AlbumSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    def get_serializer_class(self):
+        if self.action == 'create':
+            from .serializers import AlbumCreateSerializer
+            return AlbumCreateSerializer
+        return self.serializer_class
+
+    def perform_create(self, serializer):
+        # Album sẽ được tạo trong AlbumCreateSerializer
+        serializer.save()
+
+    def get_queryset(self):
+        queryset = Album.objects.all()
+        if self.action == 'my_albums':
+            # Chỉ lấy album của người dùng hiện tại
+            return queryset.filter(created_by=self.request.user)
+        return queryset
+
     @action(detail=True, methods=['get'])
     def songs(self, request, pk=None):
         album = self.get_object()
         songs = album.songs.all()
-        serializer = SongSerializer(songs, many=True)
+        serializer = SongSerializer(songs, many=True, context={'request': request})
         return Response(serializer.data)
+
     @action(detail=False, methods=['get'])
     def new_releases(self, request):
         albums = Album.objects.order_by('-release_date')[:10]
-        serializer = self.get_serializer(albums, many=True)
+        serializer = self.get_serializer(albums, many=True, context={'request': request})
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'])
+    def my_albums(self, request):
+        """Lấy danh sách album do người dùng tạo"""
+        if not request.user.is_authenticated:
+            return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        albums = self.get_queryset()
+        serializer = self.get_serializer(albums, many=True, context={'request': request})
+        return Response(serializer.data)
 
 class SongViewSet(viewsets.ModelViewSet):
     queryset = Song.objects.all()
@@ -424,45 +451,45 @@ class ResetPasswordView(APIView):
         )
 
 
-class PlaylistTracksView(APIView):
+class PlaylistSongsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, playlist_id):
         playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
-        tracks = playlist.songs.all()
-        serializer = SongSerializer(tracks, many=True)
+        songs = playlist.songs.all()
+        serializer = SongSerializer(songs, many=True)
         return Response({
-            'tracks': serializer.data,
-            'total': tracks.count()
+            'songs': serializer.data,
+            'total': songs.count()
         })
 
-class AlbumTracksView(APIView):
+class AlbumSongsView(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get(self, request, album_id):
         album = get_object_or_404(Album, id=album_id)
-        tracks = album.songs.all()
+        songs = album.songs.all()
 
         album_data = AlbumSerializer(album).data  # serialize album info
-        songs_data = SongSerializer(tracks, many=True).data
+        songs_data = SongSerializer(songs, many=True).data
 
         return Response({
             'album': album_data,
-            'tracks': songs_data,
-            'total': tracks.count()
+            'songs': songs_data,
+            'total': songs.count()
         })
 
 
-class ArtistTopTracksView(APIView):
+class ArtistTopSongsView(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get(self, request, artist_id):
         artist = get_object_or_404(Artist, id=artist_id)
-        tracks = Song.objects.filter(artists=artist).order_by('-plays')[:10]
-        serializer = SongSerializer(tracks, many=True)
+        songs = Song.objects.filter(artists=artist).order_by('-plays')[:10]
+        serializer = SongSerializer(songs, many=True)
         return Response({
-            'tracks': serializer.data,
-            'total': len(tracks)
+            'songs': serializer.data,
+            'total': len(songs)
         })
 
 class SearchView(APIView):
@@ -589,52 +616,6 @@ class FavoriteView(APIView):
         })
 
 
-class AlbumViewSet(viewsets.ModelViewSet):
-    queryset = Album.objects.all()
-    serializer_class = AlbumSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
-    def get_serializer_class(self):
-        if self.action == 'create':
-            from .serializers import AlbumCreateSerializer
-            return AlbumCreateSerializer
-        return self.serializer_class
-
-    def perform_create(self, serializer):
-        # Album sẽ được tạo trong AlbumCreateSerializer
-        serializer.save()
-
-    def get_queryset(self):
-        queryset = Album.objects.all()
-        if self.action == 'my_albums':
-            # Chỉ lấy album của người dùng hiện tại
-            return queryset.filter(created_by=self.request.user)
-        return queryset
-
-    @action(detail=True, methods=['get'])
-    def songs(self, request, pk=None):
-        album = self.get_object()
-        songs = album.songs.all()
-        serializer = SongSerializer(songs, many=True, context={'request': request})
-        return Response(serializer.data)
-
-    @action(detail=False, methods=['get'])
-    def new_releases(self, request):
-        albums = Album.objects.order_by('-release_date')[:10]
-        serializer = self.get_serializer(albums, many=True, context={'request': request})
-        return Response(serializer.data)
-
-    @action(detail=False, methods=['get'])
-    def my_albums(self, request):
-        """Lấy danh sách album do người dùng tạo"""
-        if not request.user.is_authenticated:
-            return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        albums = self.get_queryset()
-        serializer = self.get_serializer(albums, many=True, context={'request': request})
-        return Response(serializer.data)
-
-
 class AddSongToAlbumView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -687,3 +668,74 @@ class CheckFavoriteStatusView(APIView):
             return Response({'error': 'Invalid item type'}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'is_favorite': is_favorite})
+
+
+class UserAlbumViewSet(viewsets.ModelViewSet):
+    queryset = UserAlbum.objects.all()
+    serializer_class = UserAlbumSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Chỉ lấy albums của user hiện tại"""
+        return self.queryset.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        """Tự động gán user hiện tại khi tạo album"""
+        serializer.save(user=self.request.user)
+
+    @action(detail=False, methods=['get'])
+    def my_albums(self, request):
+        """Lấy tất cả albums của user (tương tự list view)"""
+        albums = self.get_queryset()
+        serializer = self.get_serializer(albums, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def add_song(self, request, pk=None):
+        """Thêm song vào album"""
+        album = self.get_object()
+        song_id = request.data.get('song_id')
+
+        if not song_id:
+            return Response(
+                {'error': 'song_id is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            song = Song.objects.get(id=song_id)
+            album.songs.add(song)
+            return Response(
+                {'status': 'Song added to album'},
+                status=status.HTTP_200_OK
+            )
+        except Song.DoesNotExist:
+            return Response(
+                {'error': 'Song not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(detail=True, methods=['delete'])
+    def remove_song(self, request, pk=None):
+        """Xóa song khỏi album"""
+        album = self.get_object()
+        song_id = request.query_params.get('song_id')
+
+        if not song_id:
+            return Response(
+                {'error': 'song_id is required as query parameter'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            song = Song.objects.get(id=song_id)
+            album.songs.remove(song)
+            return Response(
+                {'status': 'Song removed from album'},
+                status=status.HTTP_200_OK
+            )
+        except Song.DoesNotExist:
+            return Response(
+                {'error': 'Song not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )

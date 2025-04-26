@@ -21,7 +21,7 @@ class AlbumAdmin(admin.ModelAdmin):
 
 @admin.register(Song)
 class SongAdmin(admin.ModelAdmin):
-    list_display = ('title', 'album', 'track_number', 'plays')
+    list_display = ('title', 'album', 'song_number', 'plays')
     list_filter = ('album',)
     search_fields = ('title', 'album__title')
 

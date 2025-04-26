@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Genre, Artist, Album, Song, Playlist, UserProfile, ChatHistory, PasswordResetOTP, Video
+from .models import Genre, Artist, Album, Song, Playlist, UserProfile, ChatHistory, PasswordResetOTP, Video, UserAlbum
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from mutagen.mp3 import MP3
@@ -338,8 +338,8 @@ class SongCreateSerializer(serializers.ModelSerializer):
         if 'duration_str' in validated_data:
             validated_data.pop('duration_str')
 
-        # Lấy số track tiếp theo
-        track_number = album.songs.count() + 1
+        # Lấy số song tiếp theo
+        song_number = album.songs.count() + 1
 
         # Tạo bài hát mới
         song = Song.objects.create(
@@ -348,7 +348,7 @@ class SongCreateSerializer(serializers.ModelSerializer):
             duration=validated_data['duration'],
             audio_file=validated_data['audio_file'],
             image=validated_data.get('image'),
-            track_number=track_number
+            song_number=song_number
         )
 
         # Thêm nghệ sĩ cho bài hát
@@ -378,3 +378,12 @@ class FavoritesSerializer(serializers.Serializer):
             return AlbumSerializer(favorite_albums, many=True, context=self.context).data
         except UserProfile.DoesNotExist:
             return []
+
+class UserAlbumSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserAlbum
+        fields = ['id', 'user', 'title', 'description', 'cover_image', 'songs', 'created_at']
+        read_only_fields = ['user', 'created_at']
+        extra_kwargs = {
+            'songs': {'required': False}  # Cho phép tạo album không cần songs
+        }

@@ -11,11 +11,11 @@ const Section = ({
   title,
   items = [],
   seeAllLink,
-  type = "grid", // 'grid' | 'list' | 'carousel' | 'tracklist'
+  type = "grid", // 'grid' | 'list' | 'carousel' | 'songlist'
   limit = 6,
   showPlayButton = true
 }) => {
-  const { playTrack, currentTrack, isPlaying, togglePlay } = useMusicPlayer()
+  const { playSong, currentSong, isPlaying, togglePlay } = useMusicPlayer()
   const [hoveredItem, setHoveredItem] = useState(null)
   const [expandedAlbum, setExpandedAlbum] = useState(null)
   const handlePlayClick = async (e, item) => {
@@ -23,16 +23,16 @@ const Section = ({
     e.stopPropagation()
 
     try {
-      let tracks = []
+      let songs = []
       let contextUri = null
 
       switch (item.type) {
         case 'video':
-          if (currentTrack?.id === item.id) {
+          if (currentSong?.id === item.id) {
             togglePlay()
             return
           }
-          playTrack({
+          playSong({
             id: item.id,
             name: item.name,
             artists: item.artists || [],
@@ -44,11 +44,11 @@ const Section = ({
           })
           break
         case 'song':
-          if (currentTrack?.id === item.id) {
+          if (currentSong?.id === item.id) {
             togglePlay()
             return
           }
-          playTrack({
+          playSong({
             id: item.id,
             name: item.name,
             artists: item.artists || [],
@@ -60,40 +60,40 @@ const Section = ({
           break
 
         case 'playlist':
-          const playlistRes = await api.getPlaylistTracks(item.id)
-          tracks = playlistRes.data.tracks
-          if (tracks.length > 0) {
+          const playlistRes = await api.getPlaylistSongs(item.id)
+          songs = playlistRes.data.songs
+          if (songs.length > 0) {
             contextUri = `playlist:${item.id}`
-            playTrack({
-              ...tracks[0],
+            playSong({
+              ...songs[0],
               contextUri,
-              contextTracks: tracks
+              contextSongs: songs
             })
           }
           break
 
         case 'album':
-          const albumRes = await api.getAlbumTracks(item.id)
-          tracks = albumRes.data.tracks
-          if (tracks.length > 0) {
+          const albumRes = await api.getAlbumSongs(item.id)
+          songs = albumRes.data.songs
+          if (songs.length > 0) {
             contextUri = `album:${item.id}`
-            playTrack({
-              ...tracks[0],
+            playSong({
+              ...songs[0],
               contextUri,
-              contextTracks: tracks
+              contextSongs: songs
             })
           }
           break
 
         case 'artist':
-          const artistRes = await api.getArtistTopTracks(item.id)
-          tracks = artistRes.data.tracks
-          if (tracks.length > 0) {
+          const artistRes = await api.getArtistTopSongs(item.id)
+          songs = artistRes.data.songs
+          if (songs.length > 0) {
             contextUri = `artist:${item.id}`
-            playTrack({
-              ...tracks[0],
+            playSong({
+              ...songs[0],
               contextUri,
-              contextTracks: tracks
+              contextSongs: songs
             })
           }
           break
@@ -102,15 +102,15 @@ const Section = ({
           console.warn('Unknown item type:', item.type)
       }
     } catch (error) {
-      console.error("Error playing track:", error)
+      console.error("Error playing song:", error)
     }
   }
 
-  const isCurrentTrackPlaying = (item) => {
-    if (item.type === 'track' || item.type === 'song') {
-      return currentTrack?.id === item.id && isPlaying
+  const isCurrentSongPlaying = (item) => {
+    if (item.type === 'song' || item.type === 'song') {
+      return currentSong?.id === item.id && isPlaying
     }
-    return currentTrack?.contextUri === `${item.type}:${item.id}` && isPlaying
+    return currentSong?.contextUri === `${item.type}:${item.id}` && isPlaying
   }
 
   const formatDuration = (ms) => {
@@ -142,8 +142,8 @@ const Section = ({
         )}
       </div>
 
-      {type === 'tracklist' ? (
-        <div className="album-tracklist">
+      {type === 'songlist' ? (
+        <div className="album-songlist">
           {displayedItems.map((album) => (
             <div key={album.id} className="album-container">
               <div
@@ -158,7 +158,7 @@ const Section = ({
                 <div className="album-info">
                   <h3>{album.name}</h3>
                   <p>{album.artists?.map(a => a.name).join(', ') || 'Various Artists'}</p>
-                  <p>{album.total_tracks || album.tracks?.length || 0} songs</p>
+                  <p>{album.total_songs || album.songs?.length || 0} songs</p>
                 </div>
                 <button
                   className="expand-button"
@@ -171,27 +171,27 @@ const Section = ({
                 </button>
               </div>
 
-              {expandedAlbum === album.id && album.tracks && (
-                <div className="tracklist">
-                  {album.tracks.map((track, index) => (
+              {expandedAlbum === album.id && album.songs && (
+                <div className="songlist">
+                  {album.songs.map((song, index) => (
                     <div
-                      key={track.id}
-                      className="track-item"
-                      onDoubleClick={() => handlePlayClick({ preventDefault: () => { } }, track)}
+                      key={song.id}
+                      className="song-item"
+                      onDoubleClick={() => handlePlayClick({ preventDefault: () => { } }, song)}
                     >
-                      <div className="track-number">{index + 1}</div>
-                      <div className="track-info">
-                        <div className="track-name">{track.name}</div>
-                        <div className="track-artists">
-                          {track.artists?.map(a => a.name).join(', ')}
+                      <div className="song-number">{index + 1}</div>
+                      <div className="song-info">
+                        <div className="song-name">{song.name}</div>
+                        <div className="song-artists">
+                          {song.artists?.map(a => a.name).join(', ')}
                         </div>
                       </div>
-                      <div className="track-duration">
-                        {formatDuration(track.duration_ms || track.duration || 0)}
+                      <div className="song-duration">
+                        {formatDuration(song.duration_ms || song.duration || 0)}
                       </div>
                       <button
-                        className="play-track-button"
-                        onClick={(e) => handlePlayClick(e, track)}
+                        className="play-song-button"
+                        onClick={(e) => handlePlayClick(e, song)}
                       >
                         <svg viewBox="0 0 24 24">
                           <path d="M8 5v14l11-7z" />
@@ -209,8 +209,8 @@ const Section = ({
           {displayedItems.map((item) => (
             <Link
               key={item.id}
-              to={`/${(item.type === 'track' || item.type === 'song') ? 'song' : item.type}/${item.id}`}
-              className={`section-item ${currentTrack?.contextUri === `${item.type}:${item.id}` ? 'active' : ''}`}
+              to={`/${(item.type === 'song' || item.type === 'song') ? 'song' : item.type}/${item.id}`}
+              className={`section-item ${currentSong?.contextUri === `${item.type}:${item.id}` ? 'active' : ''}`}
               onMouseEnter={() => setHoveredItem(item.id)}
               onMouseLeave={() => setHoveredItem(null)}
             >
@@ -232,14 +232,14 @@ const Section = ({
                 )}
 
 
-                {showPlayButton && item.type !== 'video' && (hoveredItem === item.id || isCurrentTrackPlaying(item)) && (
+                {showPlayButton && item.type !== 'video' && (hoveredItem === item.id || isCurrentSongPlaying(item)) && (
                   <button
-                    className={`play-button ${isCurrentTrackPlaying(item) ? 'playing' : ''}`}
+                    className={`play-button ${isCurrentSongPlaying(item) ? 'playing' : ''}`}
                     onClick={(e) => handlePlayClick(e, item)}
                     aria-label={`Play ${item.name}`}
                   >
                     <svg viewBox="0 0 24 24">
-                      <path d={isCurrentTrackPlaying(item) ? "M6 19h4V5H6v14zm8-14v14h4V5h-4z" : "M8 5v14l11-7z"} />
+                      <path d={isCurrentSongPlaying(item) ? "M6 19h4V5H6v14zm8-14v14h4V5h-4z" : "M8 5v14l11-7z"} />
                     </svg>
                   </button>
                 )}
@@ -255,7 +255,7 @@ const Section = ({
                       {item.type === 'playlist' && `By ${item.owner?.display_name || 'Unknown'}`}
                       {item.type === 'album' && `By ${item.artists?.map(a => a.name).join(', ') || 'Various Artists'}`}
                       {item.type === 'artist' && 'Artist'}
-                      {(item.type === 'track' || item.type === 'song') &&
+                      {(item.type === 'song' || item.type === 'song') &&
                         `${item.artists?.map(a => a.name).join(', ')}${item.album ? ` • ${item.album.name}` : ''}`}
 
                       {(item.type === 'video') &&

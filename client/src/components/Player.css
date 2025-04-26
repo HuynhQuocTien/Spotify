@@ -53,20 +53,20 @@
     gap: 12px;
   }
   
-  .track-artwork {
+  .song-artwork {
     width: 56px;
     height: 56px;
     object-fit: cover;
     border-radius: 4px;
   }
   
-  .track-info {
+  .song-info {
     display: flex;
     flex-direction: column;
     max-width: 140px;
   }
   
-  .track-name {
+  .song-name {
     font-size: 14px;
     font-weight: 500;
     color: #fff;
@@ -75,7 +75,7 @@
     text-overflow: ellipsis;
   }
   
-  .track-artist {
+  .song-artist {
     font-size: 12px;
     color: #b3b3b3;
     white-space: nowrap;
@@ -84,7 +84,7 @@
   }
   
   .like-button {
-    color: #b3b3b3;
+    color: #1db954;
     background: none;
     border: none;
     cursor: pointer;
@@ -282,7 +282,7 @@
       display: none;
     }
   
-    .track-info {
+    .song-info {
       max-width: 100px;
     }
   }
@@ -293,7 +293,7 @@
       padding: 0 8px;
     }
   
-    .track-artwork {
+    .song-artwork {
       width: 40px;
       height: 40px;
     }

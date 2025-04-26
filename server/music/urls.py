@@ -8,8 +8,8 @@ from .views import (
     SongViewSet, PlaylistViewSet, UserProfileView,
     CustomTokenObtainPairView, RegisterView, ChatAPI,
     ForgotPasswordView, VerifyOTPView, ResetPasswordView,
-    PlaylistTracksView, AlbumTracksView, ArtistTopTracksView, SearchView, StreamVideoView, DownloadVideoView,
-    VideoViewSet
+    PlaylistSongsView, AlbumSongsView, ArtistTopSongsView, SearchView, StreamVideoView, DownloadVideoView,
+    VideoViewSet, UserAlbumViewSet
 )
 
 router = DefaultRouter()
@@ -19,6 +19,7 @@ router.register(r'albums', AlbumViewSet)
 router.register(r'songs', SongViewSet)
 router.register(r'playlists', PlaylistViewSet)
 router.register(r'videos', VideoViewSet)
+router.register(r'user-albums', UserAlbumViewSet, basename='user-album')
 
 
 urlpatterns = [
@@ -46,9 +47,9 @@ urlpatterns = [
     path('getPlaylists/', PlaylistViewSet.as_view({'get': 'list'}), name='get-playlists'),
 
     # Playlist / Album / Artist Detail
-    path('playlists/<int:playlist_id>/tracks/', PlaylistTracksView.as_view(), name='playlist-tracks'),
-    path('albums/<int:album_id>/tracks/', AlbumTracksView.as_view(), name='album-tracks'),
-    path('artists/<int:artist_id>/top-tracks/', ArtistTopTracksView.as_view(), name='artist-top-tracks'),
+    path('playlists/<int:playlist_id>/songs/', PlaylistSongsView.as_view(), name='playlist-songs'),
+    path('albums/<int:album_id>/songs/', AlbumSongsView.as_view(), name='album-songs'),
+    path('artists/<int:artist_id>/top-songs/', ArtistTopSongsView.as_view(), name='artist-top-songs'),
 
     # Artist detail & albums
     path('getArtist/<int:artist_id>/', ArtistViewSet.as_view({'get': 'retrieve'}), name='get-artist'),

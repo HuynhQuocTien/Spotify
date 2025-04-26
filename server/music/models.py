@@ -74,7 +74,7 @@ class Song(models.Model):
     )
     image = models.ImageField(upload_to='songs/', null=True, blank=True)
     artists = models.ManyToManyField(Artist, related_name='songs')
-    track_number = models.PositiveIntegerField()
+    song_number = models.PositiveIntegerField()
     plays = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -188,3 +188,14 @@ class Video(models.Model):
         minutes = total_seconds // 60
         seconds = total_seconds % 60
         return f"{minutes}:{seconds:02d}"
+
+class UserAlbum(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    cover_image = models.ImageField(upload_to='user_albums/', blank=True, null=True)
+    songs = models.ManyToManyField('Song', related_name='user_albums')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} (by {self.user.username})"

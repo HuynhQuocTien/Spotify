@@ -8,7 +8,7 @@ const Player = () => {
   const {
     queue,
     history,
-    currentTrack,
+    currentSong,
     isPlaying,
     volume,
     isMuted,
@@ -18,8 +18,8 @@ const Player = () => {
     shuffle,
     repeat,
     togglePlay,
-    playNextTrack,
-    playPreviousTrack,
+    playNextSong,
+    playPreviousSong,
     seekToPosition,
     toggleMute,
     changeVolume,
@@ -41,12 +41,12 @@ const Player = () => {
 
       if (e.code === "ArrowRight" && e.ctrlKey) {
         e.preventDefault()
-        playNextTrack()
+        playNextSong()
       }
 
       if (e.code === "ArrowLeft" && e.ctrlKey) {
         e.preventDefault()
-        playPreviousTrack()
+        playPreviousSong()
       }
 
       if (e.code === "KeyM" && e.ctrlKey) {
@@ -57,12 +57,12 @@ const Player = () => {
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [togglePlay, playNextTrack, playPreviousTrack, toggleMute])
-  if (!currentTrack) {
+  }, [togglePlay, playNextSong, playPreviousSong, toggleMute])
+  if (!currentSong) {
     return (
       <div className="player-container empty">
         <div className="player-placeholder">
-          <p>Select a track to play</p>
+          <p>Select a song to play</p>
         </div>
       </div>
     )
@@ -95,22 +95,22 @@ const Player = () => {
     <div className="player-container">
       <div className="player-left">
         <div className="now-playing">
-          {currentTrack.image && (
+          {currentSong.image && (
             <img
-              src={currentTrack.image || "/placeholder.svg"}
-              alt={currentTrack.name}
-              className="track-artwork"
+              src={currentSong.image || "/placeholder.svg"}
+              alt={currentSong.name}
+              className="song-artwork"
             />
           )}
-          <div className="track-info">
-            <div className="track-name">{currentTrack.name}</div>
-            <div className="track-artist">{currentTrack.artists?.map((artist) => artist.name).join(", ")}</div>
+          <div className="song-info">
+            <div className="song-name">{currentSong.name}</div>
+            <div className="song-artist">{currentSong.artists?.map((artist) => artist.name).join(", ")}</div>
           </div>
           <a className="like-button">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
-              fill="none"
+              fill={currentSong.is_favorite ? "#1db954" : "none"}
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
@@ -147,7 +147,7 @@ const Player = () => {
             </svg>
           </button>
 
-          <button className="prev-button" onClick={playPreviousTrack} title="Previous">
+          <button className="prev-button" onClick={playPreviousSong} title="Previous">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -175,7 +175,7 @@ const Player = () => {
             )}
           </button>
 
-          <button className="next-button" onClick={playNextTrack} title="Next">
+          <button className="next-button" onClick={playNextSong} title="Next">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -238,18 +238,18 @@ const Player = () => {
               <button onClick={() => setShowQueue(false)}>×</button>
             </div>
             <div className="queue-list">
-              {queue.map((track, index) => (
-                <div key={`${track.id}-${index}`} className="queue-item">
+              {queue.map((song, index) => (
+                <div key={`${song.id}-${index}`} className="queue-item">
                   <span className="queue-index">{index + 1}</span>
                   <img 
-                    src={track.image || '/placeholder.svg'} 
-                    alt={track.name}
+                    src={song.image || '/placeholder.svg'} 
+                    alt={song.name}
                     className="queue-artwork"
                   />
                   <div className="queue-info">
-                    <div className="queue-name">{track.name}</div>
+                    <div className="queue-name">{song.name}</div>
                     <div className="queue-artist">
-                      {track.artists?.map(a => a.name).join(', ')}
+                      {song.artists?.map(a => a.name).join(', ')}
                     </div>
                   </div>
                 </div>

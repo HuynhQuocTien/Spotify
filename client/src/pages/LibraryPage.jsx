@@ -10,8 +10,12 @@ const LibraryPage = () => {
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [libraryItems, setLibraryItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cssLoaded, setCssLoaded] = useState(false)
 
   useEffect(() => {
+    import("./LibraryPage.css").then(() => {
+      setCssLoaded(true)
+    })
     const fetchLibraryItems = async () => {
       try {
         setLoading(true);
@@ -27,7 +31,7 @@ const LibraryPage = () => {
             owner: { display_name: 'You' },
             images: [{ url: '/placeholder.svg?height=160&width=160' }],
             description: 'Your liked songs',
-            tracks: { total: 123 },
+            songs: { total: 123 },
             added_at: '2023-01-15T12:00:00Z'
           },
           {
@@ -37,7 +41,7 @@ const LibraryPage = () => {
             owner: { display_name: 'Spotify' },
             images: [{ url: '/placeholder.svg?height=160&width=160' }],
             description: 'Your weekly mixtape of fresh music',
-            tracks: { total: 30 },
+            songs: { total: 30 },
             added_at: '2023-04-10T12:00:00Z'
           },
           {
@@ -47,7 +51,7 @@ const LibraryPage = () => {
             owner: { display_name: 'Spotify' },
             images: [{ url: '/placeholder.svg?height=160&width=160' }],
             description: 'Catch all the latest music from artists you follow',
-            tracks: { total: 30 },
+            songs: { total: 30 },
             added_at: '2023-04-05T12:00:00Z'
           },
           {
@@ -56,7 +60,7 @@ const LibraryPage = () => {
             type: 'album',
             artists: [{ name: 'The Weeknd' }],
             images: [{ url: '/placeholder.svg?height=160&width=160' }],
-            tracks: { total: 14 },
+            songs: { total: 14 },
             added_at: '2023-03-20T12:00:00Z'
           },
           {
@@ -65,7 +69,7 @@ const LibraryPage = () => {
             type: 'album',
             artists: [{ name: 'Taylor Swift' }],
             images: [{ url: '/placeholder.svg?height=160&width=160' }],
-            tracks: { total: 13 },
+            songs: { total: 13 },
             added_at: '2023-02-15T12:00:00Z'
           },
           {
@@ -89,7 +93,7 @@ const LibraryPage = () => {
             owner: { display_name: 'You' },
             images: [{ url: '/placeholder.svg?height=160&width=160' }],
             description: 'Relaxing tunes for your downtime',
-            tracks: { total: 45 },
+            songs: { total: 45 },
             added_at: '2022-12-20T12:00:00Z'
           }
         ];

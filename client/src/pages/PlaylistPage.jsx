@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useMusicPlayer } from '../contexts/MusicPlayerContext';
-import './PlaylistPage.css';
+// import './PlaylistPage.css';
 
 const PlaylistPage = () => {
   const { id } = useParams();
   const [playlist, setPlaylist] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { playTrack } = useMusicPlayer();
+  const { playSong } = useMusicPlayer();
 
   useEffect(() => {
     const fetchPlaylist = async () => {
@@ -26,13 +26,13 @@ const PlaylistPage = () => {
           owner: { display_name: id === '1' ? 'You' : 'Spotify' },
           followers: { total: id === '1' ? 0 : 12345678 },
           images: [{ url: '/placeholder.svg?height=300&width=300' }],
-          tracks: {
+          songs: {
             total: 30,
             items: Array.from({ length: 30 }, (_, i) => ({
               added_at: new Date(Date.now() - i * 86400000).toISOString(),
-              track: {
-                id: `track-${i}`,
-                name: `Track ${i + 1}`,
+              song: {
+                id: `song-${i}`,
+                name: `Song ${i + 1}`,
                 artists: [{ name: `Artist ${i % 5 + 1}` }],
                 album: {
                   name: `Album ${Math.floor(i / 3) + 1}`,
@@ -56,15 +56,15 @@ const PlaylistPage = () => {
     fetchPlaylist();
   }, [id]);
 
-  const handlePlayTrack = (track, index) => {
-    // Get all tracks from the playlist
-    const tracks = playlist.tracks.items.map(item => item.track);
+  const handlePlaySong = (song, index) => {
+    // Get all songs from the playlist
+    const songs = playlist.songs.items.map(item => item.song);
     
-    // Play the clicked track and add the rest to the queue
-    const tracksAfterCurrent = tracks.slice(index + 1);
-    const tracksBeforeCurrent = tracks.slice(0, index);
+    // Play the clicked song and add the rest to the queue
+    const songsAfterCurrent = songs.slice(index + 1);
+    const songsBeforeCurrent = songs.slice(0, index);
     
-    playTrack(track, [...tracksAfterCurrent, ...tracksBeforeCurrent]);
+    playSong(song, [...songsAfterCurrent, ...songsBeforeCurrent]);
   };
 
   const formatDuration = (ms) => {
@@ -127,26 +127,26 @@ const PlaylistPage = () => {
               </>
             )}
             <span className="meta-separator">•</span>
-            <span className="playlist-tracks">{playlist.tracks.total} songs</span>
+            <span className="playlist-songs">{playlist.songs.total} songs</span>
           </div>
         </div>
       </div>
       
       <div className="playlist-actions">
-        <button className="play-all-button" onClick={() => handlePlayTrack(playlist.tracks.items[0].track, 0)}>
+        <button className="play-all-button" onClick={() => handlePlaySong(playlist.songs.items[0].song, 0)}>
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M8 5.14v14l11-7-11-7z" fill="currentColor" />
           </svg>
         </button>
       </div>
       
-      <div className="playlist-tracks">
-        <div className="tracks-header">
-          <div className="track-number">#</div>
-          <div className="track-title">Title</div>
-          <div className="track-album">Album</div>
-          <div className="track-date-added">Date added</div>
-          <div className="track-duration">
+      <div className="playlist-songs">
+        <div className="songs-header">
+          <div className="song-number">#</div>
+          <div className="song-title">Title</div>
+          <div className="song-album">Album</div>
+          <div className="song-date-added">Date added</div>
+          <div className="song-duration">
             <svg viewBox="0 0 16 16" className="duration-icon">
               <path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path>
               <path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path>
@@ -154,38 +154,38 @@ const PlaylistPage = () => {
           </div>
         </div>
         
-        <div className="tracks-list">
-          {playlist.tracks.items.map((item, index) => (
+        <div className="songs-list">
+          {playlist.songs.items.map((item, index) => (
             <div 
-              key={item.track.id} 
-              className="track-item"
-              onDoubleClick={() => handlePlayTrack(item.track, index)}
+              key={item.song.id} 
+              className="song-item"
+              onDoubleClick={() => handlePlaySong(item.song, index)}
             >
-              <div className="track-number">
-                <span className="track-index">{index + 1}</span>
+              <div className="song-number">
+                <span className="song-index">{index + 1}</span>
                 <button 
-                  className="track-play-button"
-                  onClick={() => handlePlayTrack(item.track, index)}
+                  className="song-play-button"
+                  onClick={() => handlePlaySong(item.song, index)}
                 >
                   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M8 5.14v14l11-7-11-7z" fill="currentColor" />
                   </svg>
                 </button>
               </div>
-              <div className="track-title">
+              <div className="song-title">
                 <img 
-                  src={item.track.album.images[0].url || "/placeholder.svg"} 
-                  alt={item.track.name}
-                  className="track-image"
+                  src={item.song.album.images[0].url || "/placeholder.svg"} 
+                  alt={item.song.name}
+                  className="song-image"
                 />
-                <div className="track-info">
-                  <div className="track-name">{item.track.name}</div>
-                  <div className="track-artist">{item.track.artists.map(artist => artist.name).join(', ')}</div>
+                <div className="song-info">
+                  <div className="song-name">{item.song.name}</div>
+                  <div className="song-artist">{item.song.artists.map(artist => artist.name).join(', ')}</div>
                 </div>
               </div>
-              <div className="track-album">{item.track.album.name}</div>
-              <div className="track-date-added">{formatDate(item.added_at)}</div>
-              <div className="track-duration">{formatDuration(item.track.duration_ms)}</div>
+              <div className="song-album">{item.song.album.name}</div>
+              <div className="song-date-added">{formatDate(item.added_at)}</div>
+              <div className="song-duration">{formatDuration(item.song.duration_ms)}</div>
             </div>
           ))}
         </div>

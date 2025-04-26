@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import Section from "../components/Section"
 import api from "../services/api"
-import "./HomePage.css"
 
 const HomePage = () => {
   const [greeting, setGreeting] = useState("")
@@ -14,8 +13,12 @@ const HomePage = () => {
   const [videos, setVideos] = useState([])
   const [isLoaded, setIsLoaded] = useState(false)
   const [error, setError] = useState(null)
+  const [cssLoaded, setCssLoaded] = useState(false);
 
   useEffect(() => {
+    import("./HomePage.css").then(() => {
+      setCssLoaded(true)
+    })
     // Set greeting based on time of day
     const hour = new Date().getHours()
     if (hour < 12) {

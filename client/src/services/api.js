@@ -116,14 +116,14 @@
 //  getUserAlbum: (id) => axios.get(`${API_BASE_URL}/user-albums/${id}/`),
 //  updateUserAlbum: (id, data) => axios.put(`${API_BASE_URL}/user-albums/${id}/`, data),
 //  deleteUserAlbum: (id) => axios.delete(`${API_BASE_URL}/user-albums/${id}/`),
-//  addTrackToUserAlbum: (albumId, trackId) => axios.post(`${API_BASE_URL}/user-albums/${albumId}/tracks/`, { track_id: trackId }),
-//  removeTrackFromUserAlbum: (albumId, trackId) => axios.delete(`${API_BASE_URL}/user-albums/${albumId}/tracks/${trackId}/`),
+//  addSongToUserAlbum: (albumId, songId) => axios.post(`${API_BASE_URL}/user-albums/${albumId}/songs/`, { song_id: songId }),
+//  removeSongFromUserAlbum: (albumId, songId) => axios.delete(`${API_BASE_URL}/user-albums/${albumId}/songs/${songId}/`),
 
 //  // Favorites
  
-//  getFavoriteTracks: () => axios.get(`${API_BASE_URL}/favorites/`),
-//  addFavoriteTrack: (trackId) => axios.post(`${API_BASE_URL}/favorites/`, { track_id: trackId }),
-//  removeFavoriteTrack: (trackId) => axios.delete(`${API_BASE_URL}/favorites/${trackId}/`),
+//  getFavoriteSongs: () => axios.get(`${API_BASE_URL}/favorites/`),
+//  addFavoriteSong: (songId) => axios.post(`${API_BASE_URL}/favorites/`, { song_id: songId }),
+//  removeFavoriteSong: (songId) => axios.delete(`${API_BASE_URL}/favorites/${songId}/`),
 
 //   // Search
 //   search: (query, cancelToken) => axios.get(`${API_BASE_URL}/search/?q=${query}`, {
@@ -133,9 +133,9 @@
 //   // Utils
 //   createCancelToken: () => CancelToken.source(),
 
-//   getPlaylistTracks: (playlistId) => axios.get(`${API_BASE_URL}/playlists/${playlistId}/tracks/`),
-//   getAlbumTracks: (albumId) => axios.get(`${API_BASE_URL}/albums/${albumId}/tracks/`),
-//   getArtistTopTracks: (artistId) => axios.get(`${API_BASE_URL}/artists/${artistId}/top-tracks/`),
+//   getPlaylistSongs: (playlistId) => axios.get(`${API_BASE_URL}/playlists/${playlistId}/songs/`),
+//   getAlbumSongs: (albumId) => axios.get(`${API_BASE_URL}/albums/${albumId}/songs/`),
+//   getArtistTopSongs: (artistId) => axios.get(`${API_BASE_URL}/artists/${artistId}/top-songs/`),
 // };
 
 // // Cấu hình mặc định
@@ -288,7 +288,7 @@ const api = {
   getAlbums: () => axios.get(`${API_BASE_URL}/albums/`),
   getAlbum: (id) => axios.get(`${API_BASE_URL}/albums/${id}/`),
   getAlbumSongs: (id) => axios.get(`${API_BASE_URL}/albums/${id}/songs/`),
-  getAlbumTracks: (id) => axios.get(`${API_BASE_URL}/albums/${id}/tracks/`),
+  getAlbumSongs: (id) => axios.get(`${API_BASE_URL}/albums/${id}/songs/`),
   getAlbumByArtist: (id) => axios.get(`${API_BASE_URL}/albums/artist/${id}/`),
   getNewReleases: () => axios.get(`${API_BASE_URL}/albums/new_releases/`),
   getAlbumCoverUrl: (path) => getMediaUrl(`/albums/${path}`),
@@ -297,7 +297,7 @@ const api = {
   getArtists: () => axios.get(`${API_BASE_URL}/artists/`),
   getArtist: (id) => axios.get(`${API_BASE_URL}/artists/${id}/`),
   getArtistAlbums: (id) => axios.get(`${API_BASE_URL}/getArtistAlbums/${id}/`),
-  getArtistTopTracks: (id) => axios.get(`${API_BASE_URL}/artists/${id}/top-tracks/`),
+  getArtistTopSongs: (id) => axios.get(`${API_BASE_URL}/artists/${id}/top-songs/`),
   getArtistImageUrl: (path) => getMediaUrl(`/artists/${path}`),
   getTopArtists: () => axios.get(`${API_BASE_URL}/artists/top/`),
 
@@ -305,7 +305,7 @@ const api = {
   getUserPlaylists: () => axios.get(`${API_BASE_URL}/playlists/`),
   createPlaylist: (data) => axios.post(`${API_BASE_URL}/playlists/`, data),
   getPlaylist: (id) => axios.get(`${API_BASE_URL}/playlists/${id}/`),
-  getPlaylistTracks: (id) => axios.get(`${API_BASE_URL}/playlists/${id}/tracks/`),
+  getPlaylistSongs: (id) => axios.get(`${API_BASE_URL}/playlists/${id}/songs/`),
   addSongToPlaylist: (playlistId, songId) => axios.post(`${API_BASE_URL}/playlists/${playlistId}/add_song/`, { song_id: songId }),
   removeSongFromPlaylist: (playlistId, songId) => axios.post(`${API_BASE_URL}/playlists/${playlistId}/remove_song/`, { song_id: songId }),
   getTopPlaylists: () => axios.get(`${API_BASE_URL}/playlists/top/`),
@@ -323,12 +323,13 @@ const api = {
   getUserAlbum: (id) => axios.get(`${API_BASE_URL}/user-albums/${id}/`),
   updateUserAlbum: (id, data) => axios.put(`${API_BASE_URL}/user-albums/${id}/`, data),
   deleteUserAlbum: (id) => axios.delete(`${API_BASE_URL}/user-albums/${id}/`),
-  addTrackToUserAlbum: (albumId, trackId) => axios.post(`${API_BASE_URL}/user-albums/${albumId}/tracks/`, { track_id: trackId }),
-  removeTrackFromUserAlbum: (albumId, trackId) => axios.delete(`${API_BASE_URL}/user-albums/${albumId}/tracks/${trackId}/`),
+  addSongToUserAlbum: (albumId, songId) => axios.post(`${API_BASE_URL}/user-albums/${albumId}/songs/`, { song_id: songId }),
+  removeSongFromUserAlbum: (albumId, songId) => axios.delete(`${API_BASE_URL}/user-albums/${albumId}/songs/${songId}/`),
 
   // Favorites
-  getFavoriteTracks: () => axios.get(`${API_BASE_URL}/favorites/`),
-  addFavoriteTrack: (trackId,type) => axios.post(`${API_BASE_URL}/favorites/`, { id: trackId,type: type }),
+  getFavoriteSongs: () => axios.get(`${API_BASE_URL}/favorites/`),
+  addFavoriteSong: (songId,type) => axios.post(`${API_BASE_URL}/favorites/`, { id: songId,type: type }),
+  checkFavoriteStatus: (songId, type) => axios.get(`${API_BASE_URL}/favorites/check/`, { params: { id: songId, type: type } }),
   // Search
   search: (query, cancelToken) => axios.get(`${API_BASE_URL}/search/?q=${query}`, {
     cancelToken: cancelToken || CancelToken.source().token

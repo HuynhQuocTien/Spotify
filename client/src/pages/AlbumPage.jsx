@@ -8,50 +8,48 @@ import JSZip from "jszip"
 import { saveAs } from "file-saver"
 import HeartFilledIcon from '../components/HeartFilledIcon';
 import HeartOutlineIcon from '../components/HeartOutlineIcon';
-import "./AlbumPage.css"
-
 const AlbumPage = () => {
   const { id } = useParams()
   const [album, setAlbum] = useState(null)
   const [songs, setSongs] = useState([])
   const [loading, setLoading] = useState(true)
   const [downloadingAll, setDownloadingAll] = useState(false)
-  const { playTrack, currentTrack, togglePlay } = useMusicPlayer()
+  const { playSong, currentSong, togglePlay } = useMusicPlayer()
   const [favorites, setFavorites] = useState([])
 
   const FAVORITE_TYPE = {
     SONG: 'song',
     ALBUM: 'album'
   };
-  const isFavorite = (trackId, type) => {
+  const isFavorite = (songId, type) => {
     if (!favorites || typeof favorites !== 'object') return false;
   
     if (type === 'song') {
-      console.log(favorites.songs?.some((fav) => fav.id === trackId));
-      return favorites.songs?.some((fav) => fav.id === trackId);
+      console.log(favorites.songs?.some((fav) => fav.id === songId));
+      return favorites.songs?.some((fav) => fav.id === songId);
     }
   
     if (type === 'album') {
-      return favorites.albums?.some((fav) => fav.id === trackId);
+      return favorites.albums?.some((fav) => fav.id === songId);
     }
   
     return false;
   };
-  const handleToggleFavorite = async (e, trackId, isCurrentlyFavorite, type) => {
+  const handleToggleFavorite = async (e, songId, isCurrentlyFavorite, type) => {
     e.stopPropagation();
-    setTopTracks(prev => 
-      prev.map(track => 
-        track.id === trackId 
-          ? { ...track, is_favorite: !isCurrentlyFavorite } 
-          : track
+    setTopSongs(prev => 
+      prev.map(song => 
+        song.id === song 
+          ? { ...song, is_favorite: !isCurrentlyFavorite } 
+          : song
       )
     );
     try {
-        await api.addFavoriteTrack(trackId, type);
+        await api.addFavoriteSong(songId, type);
   
-      setTopTracks((prev) =>
+      setTopSongs((prev) =>
         prev.map((t) =>
-          t.id === trackId ? { ...t, is_favorite: !t.isCurrentlyFavorite } : t
+          t.id === songId ? { ...t, is_favorite: !t.isCurrentlyFavorite } : t
         )
       );
     } catch (err) {
@@ -60,17 +58,20 @@ const AlbumPage = () => {
   };
 
   useEffect(() => {
+    import("./AlbumPage.css").then(() => {
+      setCssLoaded(true)
+    })
     const fetchAlbumAndSongs = async () => {
       try {
         setLoading(true)
         const [albumRes, songsRes] = await Promise.all([
           api.getAlbum(id),
-          api.getAlbumTracks(id)
+          api.getAlbumSongs(id)
         ])
         setAlbum(albumRes.data)
-        setSongs(songsRes.data.tracks)
+        setSongs(songsRes.data.songs)
         console.log("Album data:", albumRes.data)
-        console.log("Songs data:", songsRes.data.tracks)
+        console.log("Songs data:", songsRes.data.songs)
       } catch (error) {
         console.error("Error fetching album or songs:", error)
       } finally {
@@ -82,29 +83,29 @@ const AlbumPage = () => {
   }, [id])
   
 
-  const handlePlayTrack = (track, index) => {
-    if (!track || !songs || songs.length === 0) return
+  const handlePlaySong= (song, index) => {
+    if (!song || !songs || songs.length === 0) return
   
-    if (currentTrack?.id === track.id) {
+    if (currentSong?.id === song.id) {
       togglePlay()
       return
     }
   
     const contextUri = `album:${album.id}`
-    const contextTracks = songs
+    const contextSongs = songs
   
-    playTrack({
-      id: track.id,
-      name: track.name,
-      artists: track.artists || [],
+    playSong({
+      id: song.id,
+      name: song.name,
+      artists: song.artists || [],
       album: album
         ? { name: album.title, image: album.cover_image }
         : { name: '', image: '' },
-      duration: track.duration || track.duration_ms || 0,
-      audio: track.audio_file || track.preview_url,
-      image: track.image || album.cover_image,
+      duration: song.duration || song.duration_ms || 0,
+      audio: song.audio_file || song.preview_url,
+      image: song.image || album.cover_image,
       contextUri,
-      contextTracks
+      contextSongs
     })
   }
 
@@ -189,7 +190,7 @@ const AlbumPage = () => {
             <span className="meta-separator">•</span>
             <span className="playlist-year">{formatReleaseDate(album.release_date)}</span>
             <span className="meta-separator">•</span>
-            <span className="playlist-tracks">{album.songs_count} songs</span>
+            <span className="playlist-songs">{album.songs_count} songs</span>
           </div>
         </div>
       </div>
@@ -197,7 +198,7 @@ const AlbumPage = () => {
       <div className="playlist-actions">
         {songs.length > 0 && (
           <>
-            <button className="play-all-button" onClick={() => handlePlayTrack(songs[0], 0)}> <svg viewBox="0 0 24 24" fill="none"><path d="M8 5.14v14l11-7-11-7z" fill="currentColor" /></svg> </button>
+            <button className="play-all-button" onClick={() => handlePlaySong(songs[0], 0)}> <svg viewBox="0 0 24 24" fill="none"><path d="M8 5.14v14l11-7-11-7z" fill="currentColor" /></svg> </button>
             <button 
               className="download-all-button" 
               onClick={downloadAllSongs}
@@ -218,42 +219,42 @@ const AlbumPage = () => {
         )}
       </div>
 
-      <div className="playlist-tracks">
-        <div className="tracks-header album-tracks-header">
-          <div className="track-number">#</div>
-          <div className="track-title">Title</div>
-          <div className="track-duration">
+      <div className="playlist-songs">
+        <div className="songs-header album-songs-header">
+          <div className="song-number">#</div>
+          <div className="song-title">Title</div>
+          <div className="song-duration">
             <svg viewBox="0 0 16 16" className="duration-icon">
               <path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13z" />
               <path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z" />
             </svg>
           </div>
-          <div className="track-download">Download</div>
+          <div className="song-download">Download</div>
         </div>
 
-        <div className="tracks-list">
-          {songs.map((track, index) => (
-            <div key={track.id} className="track-item album-track-item" onDoubleClick={() => handlePlayTrack(track, index)}>
-              <div className="track-number">
-                <span className="track-index">{index + 1}</span>
-                <button className="track-play-button" onClick={() => handlePlayTrack(track, index)}>
+        <div className="songs-list">
+          {songs.map((song, index) => (
+            <div key={song.id} className="song-item album-song-item" onDoubleClick={() => handlePlaySong(song, index)}>
+              <div className="song-number">
+                <span className="song-index">{index + 1}</span>
+                <button className="song-play-button" onClick={() => handlePlaySong(song, index)}>
                   <svg viewBox="0 0 24 24" fill="none"><path d="M8 5.14v14l11-7-11-7z" fill="currentColor" /></svg>
                 </button>
               </div>
             
-              <div className="track-title album-track-title">
-                <div className="track-info">
-                  <div className="track-name">{track.title}</div>
-                  <div className="track-artist">{track.artists[0].name}</div>
+              <div className="song-title album-song-title">
+                <div className="song-info">
+                  <div className="song-name">{song.title}</div>
+                  <div className="song-artist">{song.artists[0].name}</div>
                 </div>
               </div>
             
-              <div className="track-duration">{track.duration}</div>
+              <div className="song-duration">{song.duration}</div>
             
-              <div className="track-download">
-                {track.audio_file && (
+              <div className="song-download">
+                {song.audio_file && (
                   <a 
-                    href={track.audio_file} 
+                    href={song.audio_file} 
                     download 
                     target="_blank" 
                     rel="noopener noreferrer" 
@@ -267,9 +268,9 @@ const AlbumPage = () => {
                 )}
               <button
                 className="favorite-btn"
-                onClick={(e) => handleToggleFavorite(e, track.id, track.is_favorite, 'song')}
+                onClick={(e) => handleToggleFavorite(e, song.id, song.is_favorite, 'song')}
               >
-                {track.is_favorite ? (
+                {song.is_favorite ? (
                   <HeartFilledIcon />
                 ) : (
                   <HeartOutlineIcon />

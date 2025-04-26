@@ -2,24 +2,28 @@ import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { useMusicPlayer } from "../contexts/MusicPlayerContext"
 import api from "../services/api"
-import "./UserAlbumPage.css"
 
 const UserAlbumPage = () => {
   const { id } = useParams()
   const [album, setAlbum] = useState(null)
-  const [tracks, setTracks] = useState([])
+  const [songs, setSongs] = useState([])
   const [loading, setLoading] = useState(true)
-  const { playTrack, currentTrack, togglePlay } = useMusicPlayer()
+  const { playSong, currentSong, togglePlay } = useMusicPlayer()
+  const [cssLoaded, setCssLoaded] = useState(false)
+
 
   useEffect(() => {
+    import("./UserAlbumPage.css").then(() => {
+      setCssLoaded(true)
+    })
     const fetchAlbumData = async () => {
       try {
-        const [albumRes, tracksRes] = await Promise.all([
+        const [albumRes, songsRes] = await Promise.all([
           api.getUserAlbum(id),
-          api.getAlbumTracks(id) // Giả sử API tương tự
+          api.getAlbumSongs(id) // Giả sử API tương tự
         ])
         setAlbum(albumRes.data)
-        setTracks(tracksRes.data.tracks || [])
+        setSongs(songsRes.data.songs || [])
       } catch (error) {
         console.error("Error fetching album data:", error)
       } finally {
@@ -29,35 +33,35 @@ const UserAlbumPage = () => {
     fetchAlbumData()
   }, [id])
 
-  const handlePlayTrack = (track, index) => {
-    if (currentTrack?.id === track.id) {
+  const handlePlaySong = (song, index) => {
+    if (currentSong?.id === song.id) {
       togglePlay()
       return
     }
 
     const contextUri = `user-album:${album.id}`
-    playTrack({
-      id: track.id,
-      name: track.title,
-      artists: track.artists || [],
+    playSong({
+      id: song.id,
+      name: song.title,
+      artists: song.artists || [],
       album: {
         name: album.title,
         image: album.cover_image || ""
       },
-      duration: track.duration || 0,
-      audio: track.audio_file,
-      image: track.image || album.cover_image,
+      duration: song.duration || 0,
+      audio: song.audio_file,
+      image: song.image || album.cover_image,
       contextUri,
-      contextTracks: tracks
+      contextSongs: songs
     })
   }
 
-  const handleRemoveTrack = async (trackId) => {
+  const handleRemoveSong = async (songId) => {
     try {
-      await api.removeTrackFromUserAlbum(id, trackId)
-      setTracks(tracks.filter(track => track.id !== trackId))
+      await api.removeSongFromUserAlbum(id, songId)
+      setSongs(songs.filter(song => song.id !== songId))
     } catch (error) {
-      console.error("Error removing track:", error)
+      console.error("Error removing song:", error)
     }
   }
 
@@ -84,41 +88,40 @@ const UserAlbumPage = () => {
         <div className="album-info">
           <h1 className="album-title">{album.title}</h1>
           <p className="album-description">{album.description}</p>
-          <p className="album-meta">{tracks.length} tracks</p>
+          <p className="album-meta">{songs.length} songs</p>
         </div>
       </div>
 
-      <div className="album-tracks">
-        <div className="tracks-header">
+      <div className="album-songs">
+        <div className="songs-header">
           <div className="header-number">#</div>
           <div className="header-title">Title</div>
           <div className="header-actions">Actions</div>
         </div>
 
-        <div className="tracks-list">
-          {tracks.map((track, index) => (
-            <div key={track.id} className="track-item">
-              <div className="track-number">
+        <div className="songs-list">
+          {songs.map((song, index) => (
+            <div key={song.id} className="song-item">
+              <div className="song-number">
                 <span>{index + 1}</span>
-                <button 
-                  className="play-btn"
-                  onClick={() => handlePlayTrack(track, index)}
-                >
-                  Play
+                <button className="play-btn" onClick={() => handlePlaySong(song, index)}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M8 5V19L19 12L8 5Z" fill="white" />
+                  </svg>
                 </button>
               </div>
-              <div className="track-info">
-                <div className="track-title">{track.title}</div>
-                <div className="track-artist">
-                  {track.artists?.map(artist => artist.name).join(", ")}
+              <div className="song-info">
+                <div className="song-title">{song.title}</div>
+                <div className="song-artist">
+                  {song.artists?.map(artist => artist.name).join(", ")}
                 </div>
               </div>
-              <div className="track-actions">
-                <button 
-                  className="remove-btn"
-                  onClick={() => handleRemoveTrack(track.id)}
-                >
-                  Remove
+              <div className="song-actions">
+                <button className="remove-btn" onClick={() => handleRemoveSong(song.id)}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M19 6L18 6 17 6 7 6 6 6 5 6 6 19C6 20.1 6.9 21 8 21L16 21C17.1 21 18 20.1 18 19L19 6Z" fill="currentColor" />
+                    <path d="M16 4L15 4 9 4 8 4 8 3C8 2.4 8.4 2 9 2L15 2C15.6 2 16 2.4 16 3L16 4Z" fill="currentColor" />
+                  </svg>
                 </button>
               </div>
             </div>
