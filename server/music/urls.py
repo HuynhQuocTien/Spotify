@@ -2,13 +2,14 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 
+from . import views
 from .views import (
     GenreViewSet, ArtistViewSet, AlbumViewSet,
     SongViewSet, PlaylistViewSet, UserProfileView,
     CustomTokenObtainPairView, RegisterView, ChatAPI,
     ForgotPasswordView, VerifyOTPView, ResetPasswordView,
-    PlaylistTracksView, AlbumTracksView, ArtistTopTracksView,
-    TopSongsView, NewReleasesView, FeaturedArtistsView, SearchView
+    PlaylistTracksView, AlbumTracksView, ArtistTopTracksView, SearchView, StreamVideoView, DownloadVideoView,
+    VideoViewSet
 )
 
 router = DefaultRouter()
@@ -17,6 +18,8 @@ router.register(r'artists', ArtistViewSet)
 router.register(r'albums', AlbumViewSet)
 router.register(r'songs', SongViewSet)
 router.register(r'playlists', PlaylistViewSet)
+router.register(r'videos', VideoViewSet)
+
 
 urlpatterns = [
     # Router URLs
@@ -51,10 +54,15 @@ urlpatterns = [
     path('getArtist/<int:artist_id>/', ArtistViewSet.as_view({'get': 'retrieve'}), name='get-artist'),
     path('getArtistAlbums/<int:pk>/', ArtistViewSet.as_view({'get': 'albums'}), name='get-artist-albums'),
 
-    # Discovery
-    path('songs/top/', TopSongsView.as_view(), name='top-songs'),
-    path('albums/new-releases/', NewReleasesView.as_view(), name='new-releases'),
-    path('artists/featured/', FeaturedArtistsView.as_view(), name='featured-artists'),
+
+    path('stream-video/<int:song_id>/', StreamVideoView.as_view(), name='stream_video'),
+    path('download-video/<int:song_id>/', DownloadVideoView.as_view(), name='download_video'),
+
+    path('favorites/', views.FavoriteView.as_view(), name='favorites'),
+    path('favorites/check/', views.CheckFavoriteStatusView.as_view(), name='check_favorite'),
+    path('albums/<int:album_id>/add-song/', views.AddSongToAlbumView.as_view(), name='add_song_to_album'),
+
+    path('getVideos/', VideoViewSet.as_view({'get': 'list'}), name='get-videos'),
 
     # Others
     path('search/', SearchView.as_view(), name='search'),

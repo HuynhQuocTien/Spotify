@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Genre, Artist, Album, Song, Playlist, UserProfile, ChatHistory
+from .models import Genre, Artist, Album, Song, Playlist, UserProfile, ChatHistory, Video
 
 
 @admin.register(Genre)
@@ -37,6 +37,13 @@ class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('user',)
     search_fields = ('user__username',)
     filter_horizontal = ('favorite_songs', 'favorite_albums',)
+
+@admin.register(Video)
+class VideoAdmin(admin.ModelAdmin):
+    list_display = ('title', 'genre', 'created_at', 'views')
+    list_filter = ('genre', 'created_at')
+    search_fields = ('title', 'description', 'genre__name', 'album__title', 'artists__name')
+    filter_horizontal = ('artists',)
 
 @admin.register(ChatHistory)
 class ChatHistoryAdmin(admin.ModelAdmin):

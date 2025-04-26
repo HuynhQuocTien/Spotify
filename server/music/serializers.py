@@ -1,10 +1,11 @@
 from rest_framework import serializers
-from .models import Genre, Artist, Album, Song, Playlist, UserProfile, ChatHistory, PasswordResetOTP
+from .models import Genre, Artist, Album, Song, Playlist, UserProfile, ChatHistory, PasswordResetOTP, Video
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from mutagen.mp3 import MP3
 from mutagen import MutagenError
 from django.core.validators import FileExtensionValidator
+from django.utils import timezone
 import os
 
 
@@ -68,12 +69,16 @@ class AlbumSerializer(DynamicFieldsModelSerializer):
     genre = GenreSerializer(read_only=True)
     songs_count = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
+    is_favorite = serializers.SerializerMethodField()  # Thêm trường này
+    created_by_username = serializers.SerializerMethodField()  # Thêm trường này
+
 
     class Meta:
         model = Album
         fields = ['id', 'title', 'artist', 'genre', 'release_date',
-                  'cover_image', 'songs_count', 'duration']
-        read_only_fields = ['id', 'songs_count', 'duration']
+              'cover_image', 'songs_count', 'duration', 'is_favorite',
+              'created_by_username', 'is_user_created']
+        read_only_fields = ['id', 'songs_count', 'duration', 'is_favorite', 'created_by_username']
 
     def get_songs_count(self, obj):
         return obj.songs.count()
@@ -83,6 +88,17 @@ class AlbumSerializer(DynamicFieldsModelSerializer):
         minutes = int(total // 60)
         seconds = int(total % 60)
         return f"{minutes}:{seconds:02}"
+
+    def get_is_favorite(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.favorited_by.filter(user=request.user).exists()
+        return False
+
+    def get_created_by_username(self, obj):
+        if obj.created_by:
+            return obj.created_by.username
+        return None
 
 
 class SongBasicSerializer(DynamicFieldsModelSerializer):
@@ -97,17 +113,23 @@ class SongSerializer(DynamicFieldsModelSerializer):
     duration_str = serializers.SerializerMethodField()
     is_favorite = serializers.SerializerMethodField()
     image = serializers.ImageField(required=False)
-
+    download_url = serializers.SerializerMethodField()
     class Meta:
         model = Song
         fields = ['id', 'title', 'album', 'artists', 'duration',
-                  'duration_str', 'audio_file', 'plays', 'created_at', 'is_favorite', 'image']
+                  'duration_str', 'audio_file', 'plays', 'created_at', 'is_favorite', 'image' ,'download_url']
         read_only_fields = ['id', 'plays', 'created_at', 'is_favorite']
         extra_kwargs = {
             'audio_file': {
                 'validators': [FileExtensionValidator(allowed_extensions=['mp3', 'wav', 'ogg'])]
             }
         }
+
+    def get_download_url(self, obj):
+        request = self.context.get('request')
+        if request:
+            return request.build_absolute_uri(obj.audio_file.url)
+        return obj.audio_file.url
 
     def get_duration_str(self, obj):
         total_seconds = int(obj.duration.total_seconds())
@@ -174,11 +196,16 @@ class UserProfileSerializer(DynamicFieldsModelSerializer):
     user = UserSerializer(read_only=True)
     favorite_songs = SongBasicSerializer(many=True, read_only=True)
     favorite_albums = AlbumBasicSerializer(many=True, read_only=True)
+    created_albums = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
-        fields = ['id', 'user', 'profile_picture', 'favorite_songs', 'favorite_albums']
+        fields = ['id', 'user', 'profile_picture', 'favorite_songs', 'favorite_albums', 'created_albums']
 
+    def get_created_albums(self, obj):
+        # Lấy album do người dùng tạo
+        user_albums = Album.objects.filter(created_by=obj.user)
+        return AlbumBasicSerializer(user_albums, many=True, context=self.context).data
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
@@ -225,3 +252,129 @@ class ResetPasswordSerializer(serializers.Serializer):
         if data['new_password'] != data['confirm_password']:
             raise serializers.ValidationError("Passwords do not match")
         return data
+class VideoSerializer(serializers.ModelSerializer):
+    artists = serializers.StringRelatedField(many=True)
+    album = serializers.StringRelatedField()
+    genre = serializers.StringRelatedField()
+
+    class Meta:
+        model = Video
+        fields = '__all__'
+
+
+class AlbumCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Album
+        fields = ['title', 'release_date', 'cover_image', 'genre']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        # Tạo hoặc lấy nghệ sĩ tương ứng với người dùng
+        artist, created = Artist.objects.get_or_create(
+            name=f"{user.username}'s Collection"
+        )
+
+        album = Album.objects.create(
+            title=validated_data['title'],
+            artist=artist,
+            release_date=validated_data.get('release_date', timezone.now().date()),
+            cover_image=validated_data.get('cover_image'),
+            genre=validated_data.get('genre'),
+            created_by=user,
+            is_user_created=True
+        )
+
+        return album
+
+
+class SongCreateSerializer(serializers.ModelSerializer):
+    duration_str = serializers.CharField(write_only=True, required=False)
+
+    class Meta:
+        model = Song
+        fields = ['title', 'audio_file', 'image', 'duration_str']
+
+    def validate(self, data):
+        audio_file = data.get('audio_file')
+
+        if audio_file:
+            # Kiểm tra file audio
+            try:
+                from mutagen.mp3 import MP3
+                from datetime import timedelta
+
+                audio = MP3(audio_file)
+                duration = timedelta(seconds=int(audio.info.length))
+                data['duration'] = duration
+            except Exception as e:
+                # Nếu không thể tự động tính thời gian, dùng giá trị người dùng nhập
+                if 'duration_str' in data:
+                    try:
+                        minutes, seconds = map(int, data['duration_str'].split(':'))
+                        data['duration'] = timedelta(minutes=minutes, seconds=seconds)
+                    except:
+                        raise serializers.ValidationError("Invalid duration format. Use mm:ss")
+                else:
+                    raise serializers.ValidationError("Could not determine song duration")
+
+        return data
+
+    def create(self, validated_data):
+        album_id = self.context.get('album_id')
+        if not album_id:
+            raise serializers.ValidationError("Album ID is required")
+
+        try:
+            album = Album.objects.get(id=album_id)
+        except Album.DoesNotExist:
+            raise serializers.ValidationError("Album not found")
+
+        # Kiểm tra quyền sở hữu
+        user = self.context['request'].user
+        if album.created_by != user:
+            raise serializers.ValidationError("You don't have permission to add songs to this album")
+
+        # Xóa trường không cần thiết
+        if 'duration_str' in validated_data:
+            validated_data.pop('duration_str')
+
+        # Lấy số track tiếp theo
+        track_number = album.songs.count() + 1
+
+        # Tạo bài hát mới
+        song = Song.objects.create(
+            title=validated_data['title'],
+            album=album,
+            duration=validated_data['duration'],
+            audio_file=validated_data['audio_file'],
+            image=validated_data.get('image'),
+            track_number=track_number
+        )
+
+        # Thêm nghệ sĩ cho bài hát
+        song.artists.add(album.artist)
+
+        return song
+
+
+class FavoritesSerializer(serializers.Serializer):
+    favorite_songs = serializers.SerializerMethodField()
+    favorite_albums = serializers.SerializerMethodField()
+
+    def get_favorite_songs(self, obj):
+        user = self.context['request'].user
+        try:
+            user_profile = UserProfile.objects.get(user=user)
+            favorite_songs = user_profile.favorite_songs.all()
+            return SongSerializer(favorite_songs, many=True, context=self.context).data
+        except UserProfile.DoesNotExist:
+            return []
+
+    def get_favorite_albums(self, obj):
+        user = self.context['request'].user
+        try:
+            user_profile = UserProfile.objects.get(user=user)
+            favorite_albums = user_profile.favorite_albums.all()
+            return AlbumSerializer(favorite_albums, many=True, context=self.context).data
+        except UserProfile.DoesNotExist:
+            return []

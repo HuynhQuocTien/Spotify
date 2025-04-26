@@ -1,0 +1,190 @@
+
+.user-album-page {
+    padding: 24px 32px;
+    background: linear-gradient(#1a1a1a, #121212);
+    min-height: 100vh;
+    color: white;
+  }
+  
+  .album-header {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  
+  .album-cover {
+    width: 232px;
+    height: 232px;
+    min-width: 232px;
+    background: #282828;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  }
+  
+  .album-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .default-cover {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #535353, #282828);
+  }
+  
+  .default-cover span {
+    font-size: 72px;
+    font-weight: 700;
+    color: #b3b3b3;
+  }
+  
+  .album-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  
+  .album-title {
+    font-size: 48px;
+    font-weight: 900;
+    margin: 0 0 16px;
+    line-height: 1;
+  }
+  
+  .album-description {
+    font-size: 14px;
+    color: #b3b3b3;
+    margin: 0 0 16px;
+  }
+  
+  .album-meta {
+    font-size: 14px;
+    color: #b3b3b3;
+    margin: 0;
+  }
+  
+  .album-tracks {
+    margin-top: 40px;
+  }
+  
+  .tracks-header {
+    display: grid;
+    grid-template-columns: 40px 1fr 80px;
+    padding: 0 16px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #282828;
+    color: #b3b3b3;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .header-number {
+    text-align: center;
+  }
+  
+  .tracks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .track-item {
+    display: grid;
+    grid-template-columns: 40px 1fr 80px;
+    align-items: center;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .track-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .track-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #b3b3b3;
+    font-size: 14px;
+  }
+
+  
+  .track-item:hover .play-btn {
+    opacity: 1;
+  }
+  
+  .track-item:hover .track-number span {
+    opacity: 0;
+  }
+  
+  .track-info {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 0;
+  }
+  
+  .track-title {
+    font-size: 16px;
+    margin: 0;
+    color: white;
+  }
+  
+  .track-artist {
+    font-size: 14px;
+    color: #b3b3b3;
+    margin-top: 4px;
+  }
+  
+  .track-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .remove-btn {
+    background: none;
+    border: none;
+    color: #b3b3b3;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 8px;
+    opacity: 0;
+    transition: all 0.2s ease;
+  }
+  
+  .track-item:hover .remove-btn {
+    opacity: 1;
+  }
+  
+  .remove-btn:hover {
+    color: white;
+    transform: scale(1.1);
+  }
+  
+  @media (max-width: 768px) {
+    .album-header {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .album-cover {
+      width: 200px;
+      height: 200px;
+    }
+    
+    .album-title {
+      font-size: 32px;
+    }
+    
+    .user-album-page {
+      padding: 16px;
+    }
+  }

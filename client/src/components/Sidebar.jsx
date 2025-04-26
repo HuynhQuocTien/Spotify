@@ -6,18 +6,7 @@ import "./Sidebar.css"
 
 const Sidebar = () => {
   const location = useLocation()
-  const [playlists, setPlaylists] = useState([
-    { id: "1", name: "Liked Songs" },
-    { id: "2", name: "Discover Weekly" },
-    { id: "3", name: "Release Radar" },
-    { id: "4", name: "Daily Mix 1" },
-    { id: "5", name: "Daily Mix 2" },
-    { id: "6", name: "Daily Mix 3" },
-    { id: "7", name: "Rock Classics" },
-    { id: "8", name: "Chill Hits" },
-    { id: "9", name: "Jazz Vibes" },
-    { id: "10", name: "Workout Playlist" },
-  ])
+  const [playlists, setPlaylists] = useState([])
 
   const isActive = (path) => location.pathname === path
 
@@ -63,22 +52,27 @@ const Sidebar = () => {
         </ul>
 
         <div className="sidebar-actions">
-          <button className="create-playlist-btn">
-            <div className="create-playlist-icon">
-              <svg viewBox="0 0 16 16" className="plus-icon">
-                <path d="M15.25 8a.75.75 0 0 1-.75.75H8.75v5.75a.75.75 0 0 1-1.5 0V8.75H1.5a.75.75 0 0 1 0-1.5h5.75V1.5a.75.75 0 0 1 1.5 0v5.75h5.75a.75.75 0 0 1 .75.75z"></path>
-              </svg>
-            </div>
-            <span>Create Playlist</span>
-          </button>
+          <Link to={"/my-albums"}>
+            <button className="create-playlist-btn">
+              <div className="create-playlist-icon">
+                <svg viewBox="0 0 16 16" className="plus-icon">
+                  <path d="M15.25 8a.75.75 0 0 1-.75.75H8.75v5.75a.75.75 0 0 1-1.5 0V8.75H1.5a.75.75 0 0 1 0-1.5h5.75V1.5a.75.75 0 0 1 1.5 0v5.75h5.75a.75.75 0 0 1 .75.75z"></path>
+                </svg>
+              </div>
+              <span>My Albums</span>
+            </button>
+          </Link>
+          <Link to={"/favorites"}>
+          
           <button className="liked-songs-btn">
             <div className="liked-songs-icon">
               <svg viewBox="0 0 16 16" className="heart-icon">
                 <path d="M15.724 4.22A4.313 4.313 0 0 0 12.192.814a4.269 4.269 0 0 0-3.622 1.13.837.837 0 0 1-1.14 0 4.272 4.272 0 0 0-6.21 5.855l5.916 7.05a1.128 1.128 0 0 0 1.727 0l5.916-7.05a4.228 4.228 0 0 0 .945-3.577z"></path>
               </svg>
             </div>
-            <span>Liked Songs</span>
+            <span>Favorites</span>
           </button>
+          </Link>
         </div>
       </nav>
 

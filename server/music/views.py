@@ -15,12 +15,12 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from .models import Genre, Artist, Album, Song, Playlist, UserProfile, ChatHistory, PasswordResetOTP
+from .models import Genre, Artist, Album, Song, Playlist, UserProfile, ChatHistory, PasswordResetOTP, Video
 from .serializers import (
     GenreSerializer, ArtistSerializer, AlbumSerializer,
     SongSerializer, PlaylistSerializer, UserProfileSerializer,
     CustomTokenObtainPairSerializer, ChatHistorySerializer, ForgotPasswordSerializer, VerifyOTPSerializer,
-    ResetPasswordSerializer
+    ResetPasswordSerializer, VideoSerializer
 )
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
@@ -244,8 +244,12 @@ class UserProfileView(APIView):
 
     def get(self, request):
         profile = get_object_or_404(UserProfile, user=request.user)
-        serializer = UserProfileSerializer(profile)
-        return Response(serializer.data)
+        created_albums = Album.objects.filter(created_by=request.user)
+        serializer = UserProfileSerializer(profile, context={'request': request})
+        response_data = serializer.data
+        response_data['created_albums'] = AlbumSerializer(created_albums, many=True, context={'request': request}).data
+
+        return Response(response_data)
 
     def put(self, request):
         profile, _ = UserProfile.objects.get_or_create(user=request.user)
@@ -438,11 +442,16 @@ class AlbumTracksView(APIView):
     def get(self, request, album_id):
         album = get_object_or_404(Album, id=album_id)
         tracks = album.songs.all()
-        serializer = SongSerializer(tracks, many=True)
+
+        album_data = AlbumSerializer(album).data  # serialize album info
+        songs_data = SongSerializer(tracks, many=True).data
+
         return Response({
-            'tracks': serializer.data,
+            'album': album_data,
+            'tracks': songs_data,
             'total': tracks.count()
         })
+
 
 class ArtistTopTracksView(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -456,31 +465,6 @@ class ArtistTopTracksView(APIView):
             'total': len(tracks)
         })
 
-
-class TopSongsView(generics.ListAPIView):
-    serializer_class = SongSerializer
-
-    def get_queryset(self):
-        return Song.objects.annotate(
-            play_count=Count('plays')
-        ).order_by('-play_count')[:50]
-
-
-class NewReleasesView(generics.ListAPIView):
-    serializer_class = AlbumSerializer
-
-    def get_queryset(self):
-        return Album.objects.order_by('-release_date')[:20]
-
-
-class FeaturedArtistsView(generics.ListAPIView):
-    serializer_class = ArtistSerializer
-
-    def get_queryset(self):
-        return Artist.objects.annotate(
-            song_count=Count('songs')
-        ).order_by('-song_count')[:10]
-
 class SearchView(APIView):
     def get(self, request):
         q = request.GET.get('q', '')
@@ -493,3 +477,213 @@ class SearchView(APIView):
             'albums': AlbumSerializer(albums, many=True).data,
             'artists': ArtistSerializer(artists, many=True).data
         })
+class VideoSongsView(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        video_songs = Song.objects.exclude(video_file='').exclude(video_file__isnull=True)
+        serializer = SongSerializer(video_songs, many=True)
+        return Response(serializer.data)
+
+class StreamVideoView(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request, song_id):
+        song = get_object_or_404(Song, id=song_id)
+
+        if song.video_file:
+            file_path = song.video_file.path
+            if os.path.exists(file_path):
+                response = FileResponse(open(file_path, 'rb'))
+                response['Content-Type'] = 'video/mp4'
+                response['Content-Disposition'] = f'inline; filename="{quote(song.title)}.mp4"'
+                return response
+
+        return Response({'error': 'Video file not available'}, status=404)
+
+class DownloadVideoView(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request, song_id):
+        song = get_object_or_404(Song, id=song_id)
+
+        if song.video_file:
+            file_path = song.video_file.path
+            if os.path.exists(file_path):
+                response = FileResponse(open(file_path, 'rb'))
+                response['Content-Type'] = 'video/mp4'
+                response['Content-Disposition'] = f'attachment; filename="{quote(song.title)}.mp4"'
+                return response
+
+        return Response({'error': 'Video file not available'}, status=404)
+
+class MultiMediaSongsView(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        songs = Song.objects.all()
+        data = []
+        for song in songs:
+            data.append({
+                'id': song.id,
+                'title': song.title,
+                'has_audio': bool(song.audio_file or song.audio_url),
+                'has_video': bool(song.video_file),
+                'audio_url': song.audio_file.url if song.audio_file else song.audio_url,
+                'video_url': song.video_file.url if song.video_file else None
+            })
+        return Response(data)
+
+class VideoViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Video.objects.all().order_by('-created_at')
+    serializer_class = VideoSerializer
+
+    @action(detail=True, methods=['get'])
+    def info(self, request, pk=None):
+        video = self.get_object()
+        serializer = self.get_serializer(video)
+        return Response(serializer.data)
+
+
+class FavoriteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        item_id = request.data.get('id')
+        item_type = request.data.get('type')  # 'song' hoặc 'album'
+
+        profile = get_object_or_404(UserProfile, user=request.user)
+
+        if item_type == 'song':
+            song = get_object_or_404(Song, id=item_id)
+            if song in profile.favorite_songs.all():
+                profile.favorite_songs.remove(song)
+                return Response({'status': 'removed', 'message': 'Đã xóa bài hát khỏi danh sách yêu thích'})
+            else:
+                profile.favorite_songs.add(song)
+                return Response({'status': 'added', 'message': 'Đã thêm bài hát vào danh sách yêu thích'})
+
+        elif item_type == 'album':
+            album = get_object_or_404(Album, id=item_id)
+            if album in profile.favorite_albums.all():
+                profile.favorite_albums.remove(album)
+                return Response({'status': 'removed', 'message': 'Đã xóa album khỏi danh sách yêu thích'})
+            else:
+                profile.favorite_albums.add(album)
+                return Response({'status': 'added', 'message': 'Đã thêm album vào danh sách yêu thích'})
+
+        return Response({'error': 'Invalid item type'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        profile = get_object_or_404(UserProfile, user=request.user)
+
+        favorite_songs = profile.favorite_songs.all()
+        favorite_albums = profile.favorite_albums.all()
+
+        songs_serializer = SongSerializer(favorite_songs, many=True, context={'request': request})
+        albums_serializer = AlbumSerializer(favorite_albums, many=True, context={'request': request})
+
+        return Response({
+            'songs': songs_serializer.data,
+            'albums': albums_serializer.data
+        })
+
+
+class AlbumViewSet(viewsets.ModelViewSet):
+    queryset = Album.objects.all()
+    serializer_class = AlbumSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            from .serializers import AlbumCreateSerializer
+            return AlbumCreateSerializer
+        return self.serializer_class
+
+    def perform_create(self, serializer):
+        # Album sẽ được tạo trong AlbumCreateSerializer
+        serializer.save()
+
+    def get_queryset(self):
+        queryset = Album.objects.all()
+        if self.action == 'my_albums':
+            # Chỉ lấy album của người dùng hiện tại
+            return queryset.filter(created_by=self.request.user)
+        return queryset
+
+    @action(detail=True, methods=['get'])
+    def songs(self, request, pk=None):
+        album = self.get_object()
+        songs = album.songs.all()
+        serializer = SongSerializer(songs, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def new_releases(self, request):
+        albums = Album.objects.order_by('-release_date')[:10]
+        serializer = self.get_serializer(albums, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def my_albums(self, request):
+        """Lấy danh sách album do người dùng tạo"""
+        if not request.user.is_authenticated:
+            return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        albums = self.get_queryset()
+        serializer = self.get_serializer(albums, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+class AddSongToAlbumView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, album_id):
+        album = get_object_or_404(Album, id=album_id)
+
+        # Kiểm tra quyền sở hữu
+        if album.created_by != request.user:
+            return Response({'error': 'You do not have permission to modify this album'},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        # Sử dụng serializer để validate và tạo bài hát
+        from .serializers import SongCreateSerializer
+
+        serializer = SongCreateSerializer(
+            data=request.data,
+            context={'request': request, 'album_id': album_id}
+        )
+
+        if serializer.is_valid():
+            song = serializer.save()
+            return Response(
+                SongSerializer(song, context={'request': request}).data,
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CheckFavoriteStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        item_id = request.query_params.get('id')
+        item_type = request.query_params.get('type')  # 'song' hoặc 'album'
+
+        if not item_id or not item_type:
+            return Response({'error': 'id and type parameters are required'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        profile = get_object_or_404(UserProfile, user=request.user)
+
+        if item_type == 'song':
+            song = get_object_or_404(Song, id=item_id)
+            is_favorite = song in profile.favorite_songs.all()
+        elif item_type == 'album':
+            album = get_object_or_404(Album, id=item_id)
+            is_favorite = album in profile.favorite_albums.all()
+        else:
+            return Response({'error': 'Invalid item type'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'is_favorite': is_favorite})

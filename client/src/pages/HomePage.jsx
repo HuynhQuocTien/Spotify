@@ -11,6 +11,7 @@ const HomePage = () => {
   const [artists, setArtists] = useState([])
   const [albums, setAlbums] = useState([])
   const [songs, setSongs] = useState([])
+  const [videos, setVideos] = useState([])
   const [isLoaded, setIsLoaded] = useState(false)
   const [error, setError] = useState(null)
 
@@ -48,6 +49,14 @@ const HomePage = () => {
       audio: song.audio_file,
       description: `By ${song.album.artist.name || "Unknown"}`
     })
+    const formatVideo = (video) => ({
+      id: video.id,
+      name: video.title,
+      type: "video",
+      image: video.thumbnail || "/placeholder-video.svg",
+      video: video.video_file,
+      description: `By ${Array.isArray(video.artists) && video.artists.length > 0 ? video.artists.join(", ") : "Unknown"}`
+    })
 
     // Fetch data
     const fetchData = async () => {
@@ -58,15 +67,18 @@ const HomePage = () => {
         const [
           artistsResponse,
           albumsResponse,
-          songsResponse
+          songsResponse,
+          videosResponse
         ] = await Promise.all([
           api.getArtists(),
           api.getAlbums(),
-          api.getSongs()
+          api.getSongs(),
+          api.getVideos()
         ])
         setArtists(artistsResponse.data.map(formatArtist))
         setAlbums(albumsResponse.data.map(formatAlbum))
         setSongs(songsResponse.data.map(formatSong))
+        setVideos(videosResponse.data.map(formatVideo))
 
         setIsLoaded(true)
       } catch (err) {
@@ -105,6 +117,21 @@ const HomePage = () => {
     <div className="home-page">
       <h1 className="greeting-title">{greeting}</h1>
 
+      {videos.length > 0 && (
+        <Section
+          title="Featured Videos"
+          items={videos}
+          seeAllLink="/browse/videos"
+        />
+      )}
+
+      {songs.length > 0 && (
+        <Section
+          title="Top Songs"
+          items={songs}
+          seeAllLink="/browse/songs"
+        />
+      )}
 
       {artists.length > 0 && (
         <Section
@@ -122,13 +149,6 @@ const HomePage = () => {
         />
       )}
 
-      {songs.length > 0 && (
-        <Section
-          title="Top Songs"
-          items={songs}
-          seeAllLink="/browse/songs"
-        />
-      )}
 
     </div>
   )

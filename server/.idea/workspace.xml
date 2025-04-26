@@ -5,30 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7784712c-c114-4f41-843e-ce3b0b975991" name="Changes" comment="feat: Enhance music player functionality with improved track handling, UI updates, and new API integrations">
-      <change beforePath="$PROJECT_DIR$/../client/src/components/AppHeader.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/AppHeader.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/components/AppHeader.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/AppHeader.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/components/Player.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Player.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../client/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../client/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/components/Player.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Player.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/components/ProtectedRoute.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/ProtectedRoute.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/components/Section.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Section.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/components/Section.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Section.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/components/Sidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Sidebar.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/contexts/MusicPlayerContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/contexts/MusicPlayerContext.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/pages/AlbumPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/AlbumPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/pages/ArtistPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/ArtistPage.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/pages/ArtistPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/ArtistPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/Home.jsx" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/pages/HomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/HomePage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/Login.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/LoginPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/LoginPage.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/LoginPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/LoginPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/Playlist.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/Search.jsx" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/routes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/routes.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/src/services/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/services/api.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/services/firebase.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/styles/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/styles/main.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/../client/vite.config.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/music/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/admin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/music/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/music/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/music/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/urls.py" afterDir="false" />
@@ -126,8 +117,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-PY-243.26053.29" />
-        <option value="bundled-python-sdk-b1dbf8ef85a6-4df51de95216-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.26053.29" />
+        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-PY-251.23774.444" />
+        <option value="bundled-python-sdk-890ed5b35930-d9c5bdb153f4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.23774.444" />
       </set>
     </attachedChunks>
   </component>
@@ -154,7 +145,14 @@
       <workItem from="1744549889578" duration="3134000" />
       <workItem from="1744560092006" duration="5608000" />
       <workItem from="1744594996192" duration="4821000" />
-      <workItem from="1744616695650" duration="7017000" />
+      <workItem from="1744616695650" duration="9393000" />
+      <workItem from="1745163927722" duration="21000" />
+      <workItem from="1745164618894" duration="1000" />
+      <workItem from="1745164853961" duration="7331000" />
+      <workItem from="1745322519128" duration="4763000" />
+      <workItem from="1745463193462" duration="1930000" />
+      <workItem from="1745586254272" duration="14085000" />
+      <workItem from="1745635435123" duration="3535000" />
     </task>
     <task id="LOCAL-00001" summary="init server">
       <option name="closed" value="true" />

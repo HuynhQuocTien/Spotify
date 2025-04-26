@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useMusicPlayer } from '../contexts/MusicPlayerContext';
-import './ArtistPage.css';
+import HeartFilledIcon from '../components/HeartFilledIcon';
+import HeartOutlineIcon from '../components/HeartOutlineIcon';
 import api from '../services/api';
+import './ArtistPage.css';
 
 const ArtistPage = () => {
   const { id } = useParams();
@@ -10,123 +12,118 @@ const ArtistPage = () => {
   const [topTracks, setTopTracks] = useState([]);
   const [albums, setAlbums] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { playTrack, currentTrack, isPlaying } = useMusicPlayer();
+  const { playTrack, currentTrack, isPlaying, favorites, updateFavorites } = useMusicPlayer();
 
+  const audioRef = useRef(null);
+  const FAVORITE_TYPE = {
+    SONG: 'song',
+    ALBUM: 'album'
+  };
   useEffect(() => {
     const fetchArtistData = async () => {
       try {
         setLoading(true);
-        
-        // Fetch all data in parallel
-        const [artistResponse, albumsResponse, songsResponse] = await Promise.all([
+        const [artistRes, albumsRes, songsRes] = await Promise.all([
           api.getArtist(id),
           api.getArtistAlbums(id),
-          api.getArtistTopTracks(id)
+          api.getArtistTopTracks(id),
         ]);
-        
-        console.log('Artist Response:', artistResponse.data);
-        console.log('Albums Response:', albumsResponse);
-        console.log('Top Tracks Response:', songsResponse);
-        // Process artist data
-        const processedArtist = {
-          ...artistResponse.data,
-          images: artistResponse.data.image
-            ? [{ url: artistResponse.data.image }]
-            : [{ url: '/placeholder.svg?height=640&width=640' }],
-          followers: { total: artistResponse.data.followers || 0 }
-        };
-        
-        // Process top tracks
-        const processedTopTracks = songsResponse.data.tracks.map((track) => ({
-          id: track.id,
-          name: track.title,
-          artists: track.artists.map((artist) => ({
-            id: artist.id,
-            name: artist.name,
-            image: artist.image,
-          })),
-          album: {
-            id: track.album.id,
-            name: track.album.title,
-            images: track.album.cover_image
-              ? [{ url: track.album.cover_image }]
-              : [{ url: '/placeholder.svg?height=64&width=64' }],
-          },
-          duration_ms: convertDurationToMs(track.duration) || 0,
-          duration_str: track.duration_str,
-          audio_file: track.audio_file,
-          image: track.image,
-          is_favorite: track.is_favorite,
-        }));
-        
-        // Process albums
-        const processedAlbums = albumsResponse.data.map((album) => ({
-          id: album.id,
-          name: album.title,
-          artists: album.artists || [],
-          images: album.cover_image
-            ? [{ url: album.cover_image }]
-            : [{ url: '/placeholder.svg?height=160&width=160' }],
-          album_type: album.album_type || 'album',
-          release_date: album.release_date || 'Unknown',
-          type: 'album',
+      setArtist(artistRes.data);
+      setAlbums(albumsRes.data.items);
+      setTopTracks(songsRes.data.tracks);
+
+        // Thêm logic khôi phục favorite từ localStorage
+        const processedTracks = songsRes.data.tracks.map((track) => ({
+          ...track,
+          is_favorite: JSON.parse(
+            localStorage.getItem(`favorite_song_${track.id}`) || "false"
+          ),
         }));
 
-        setArtist(processedArtist);
-        setTopTracks(processedTopTracks);
-        setAlbums(processedAlbums);
-      } catch (error) {
-        console.error('Error fetching artist data:', error);
+        setTopTracks(processedTracks);
+        // ... phần còn lại giữ nguyên
+      } catch (err) {
+        console.error('Error loading artist data:', err);
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchArtistData();
   }, [id]);
 
-  const convertDurationToMs = (durationStr) => {
-    if (!durationStr) return 0;
-    
-    const parts = durationStr.split(':');
-    if (parts.length === 3) {
-      // Format HH:mm:ss
-      const hours = parseInt(parts[0]);
-      const minutes = parseInt(parts[1]);
-      const seconds = parseInt(parts[2]);
-      return (hours * 3600 + minutes * 60 + seconds) * 1000;
-    } else if (parts.length === 2) {
-      // Format mm:ss
-      const minutes = parseInt(parts[0]);
-      const seconds = parseInt(parts[1]);
-      return (minutes * 60 + seconds) * 1000;
-    }
-    return 0;
-  };
-  const handlePlayTrack = (track) => {
-    playTrack(track, topTracks);
-  };
-
-  const handlePlayArtist = () => {
-    if (topTracks.length > 0) {
-      playTrack(topTracks[0], topTracks);
-    }
+  const formatDuration = (ms) => {
+    const m = Math.floor(ms / 60000);
+    const s = Math.floor((ms % 60000) / 1000);
+    return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
   const formatFollowers = (count) => {
-    if (count >= 1000000) {
-      return `${(count / 1000000).toFixed(1)}M followers`;
-    } else if (count >= 1000) {
-      return `${(count / 1000).toFixed(1)}K followers`;
-    }
+    if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M followers`;
+    if (count >= 1_000) return `${(count / 1_000).toFixed(1)}K followers`;
     return `${count} followers`;
   };
 
-  const formatDuration = (ms) => {
-    const minutes = Math.floor(ms / 60000);
-    const seconds = Math.floor((ms % 60000) / 1000);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  const handlePlayTrack = async (e, track) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+
+    if (!track.audio_file || loading) return;
+
+    try {
+      await playTrack({
+        ...track,
+        audio: track.audio_file,
+        contextTracks: topTracks,
+        contextUri: `artist:${id}:track:${track.id}`,
+      });
+    } catch (err) {
+      console.error('Playback failed:', err);
+    }
   };
+
+  const handlePlayArtist = async (e) => {
+    e?.preventDefault();
+    if (topTracks.length > 0) {
+      await playTrack({
+        ...topTracks[0],
+        audio: topTracks[0].audio_file,
+        contextTracks: topTracks,
+        contextUri: `artist:${id}`,
+      });
+    }
+  };
+
+  // Thêm vào hàm handleToggleFavorite
+  const handleToggleFavorite = async (e, trackId, isCurrentlyFavorite, type) => {
+    e.stopPropagation();
+    const newState = !isCurrentlyFavorite;
+
+    // 1. Cập nhật UI ngay lập tức
+    setTopTracks(prev => prev.map(track =>
+      track.id === trackId ? { ...track, is_favorite: newState } : track
+    ));
+
+    // 2. Lưu vào localStorage
+    localStorage.setItem(`favorite_${type}_${trackId}`, JSON.stringify(newState));
+
+    try {
+      await api.addFavoriteTrack(trackId, type);
+
+      // 4. (Optional) Cập nhật context nếu có
+      if (updateFavorites) {
+        updateFavorites(trackId, type, newState ? 'add' : 'remove');
+      }
+    } catch (err) {
+      // Rollback nếu lỗi
+      setTopTracks(prev => prev.map(track =>
+        track.id === trackId ? { ...track, is_favorite: isCurrentlyFavorite } : track
+      ));
+      localStorage.setItem(`favorite_${type}_${trackId}`, JSON.stringify(isCurrentlyFavorite));
+      console.error('Toggle favorite failed:', err);
+    }
+  };
+
 
   if (loading) {
     return (
@@ -147,10 +144,12 @@ const ArtistPage = () => {
 
   return (
     <div className="artist-page">
-      {/* Artist Header Section */}
-      <div className="artist-header" style={{ 
-        backgroundImage: `linear-gradient(transparent 0, rgba(0, 0, 0, 0.5) 100%), url(${artist.images[0].url})`
-      }}>
+      <div
+        className="artist-header"
+        style={{
+          backgroundImage: `linear-gradient(transparent 0, rgba(0, 0, 0, 0.5)), url(${artist.image})`,
+        }}
+      >
         <div className="artist-header-content">
           <div className="artist-info">
             <div className="verified-badge">
@@ -160,20 +159,14 @@ const ArtistPage = () => {
               Verified Artist
             </div>
             <h1 className="artist-name">{artist.name}</h1>
-            <div className="artist-followers">{formatFollowers(artist.followers.total)}</div>
+            <div className="artist-followers">1</div>
           </div>
         </div>
       </div>
 
-      {/* Artist Actions */}
       <div className="artist-actions">
-        <button 
-          className="play-button"
-          onClick={handlePlayArtist}
-        >
-          <svg viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z" fill="currentColor" />
-          </svg>
+        <button className="play-button" onClick={handlePlayArtist}>
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor" /></svg>
         </button>
         <button className="follow-button">Follow</button>
         <button className="more-button">
@@ -183,15 +176,14 @@ const ArtistPage = () => {
         </button>
       </div>
 
-      {/* Popular Tracks Section */}
       <div className="popular-tracks-section">
         <h2 className="section-title">Popular</h2>
         <div className="tracks-list">
           {topTracks.map((track, index) => (
-            <div 
-              key={track.id} 
+            <div
+              key={track.id}
               className={`track-row ${currentTrack?.id === track.id && isPlaying ? 'active' : ''}`}
-              onClick={() => handlePlayTrack(track)}
+              onClick={(e) => handlePlayTrack(e, track)}
             >
               <div className="track-number">
                 {currentTrack?.id === track.id && isPlaying ? (
@@ -205,72 +197,33 @@ const ArtistPage = () => {
                 )}
               </div>
               <div className="track-info">
-                <div className="track-name">{track.name}</div>
+                <div className="track-name">{track.title}</div>
                 <div className="track-artists">
-                  {track.artists.map((artist, i) => (
-                    <span key={artist.id}>
+                  {track.artists.map((a, i) => (
+                    <span key={a.id}>
                       {i > 0 && ', '}
-                      <Link to={`/artist/${artist.id}`} className="artist-link" onClick={e => e.stopPropagation()}>
-                        {artist.name}
+                      <Link to={`/artist/${a.id}`} className="artist-link" onClick={(e) => e.stopPropagation()}>
+                        {a.name}
                       </Link>
                     </span>
                   ))}
                 </div>
               </div>
               <div className="track-album">
-                <Link to={`/album/${track.album.id}`} onClick={e => e.stopPropagation()}>
+                <Link to={`/album/${track.album.id}`} onClick={(e) => e.stopPropagation()}>
                   {track.album.name}
                 </Link>
               </div>
-              <div className="track-duration">
-                {formatDuration(track.duration_ms)}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Albums Section */}
-      <div className="albums-section">
-        <h2 className="section-title">Albums</h2>
-        <div className="albums-grid">
-          {albums.map(album => (
-            <Link 
-              key={album.id} 
-              to={`/album/${album.id}`}
-              className="album-card"
-            >
-              <div className="album-cover">
-                <img 
-                  src={album.images[0].url} 
-                  alt={album.name}
-                  className="album-image"
-                />
-                <button 
-                  className="play-button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const albumTracks = topTracks.filter(t => t.album.id === album.id);
-                    if (albumTracks.length > 0) {
-                      playTrack(albumTracks[0], albumTracks);
-                    }
-                  }}
+              <div className="track-duration">{track.duration}</div>
+              <div className="track-actions">
+                <button
+                  className={`favorite-btn ${track.is_favorite ? 'active' : ''}`}
+                  onClick={(e) => handleToggleFavorite(e, track.id, track.is_favorite, 'song')}
                 >
-                  <svg viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" fill="currentColor" />
-                  </svg>
+                  {track.is_favorite ? <HeartFilledIcon /> : <HeartOutlineIcon />}
                 </button>
               </div>
-              <div className="album-info">
-                <h3 className="album-name">{album.name}</h3>
-                <div className="album-meta">
-                  <span className="album-year">{album.release_date.split('-')[0]}</span>
-                  <span className="meta-separator">•</span>
-                  <span className="album-type">{album.album_type.charAt(0).toUpperCase() + album.album_type.slice(1)}</span>
-                </div>
-              </div>
-            </Link>
+            </div>
           ))}
         </div>
       </div>

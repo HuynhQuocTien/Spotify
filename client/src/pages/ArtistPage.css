@@ -427,3 +427,60 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* Styling cho nút yêu thích */
+.track-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+.favorite-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b3b3b3; /* Màu mặc định cho icon */
+}
+
+.favorite-btn:hover {
+  color: white;
+  transform: scale(1.1);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.favorite-btn:active {
+  transform: scale(0.95);
+}
+
+/* Style cho các icon heart */
+.favorite-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Khi đã favorite (filled heart) */
+.favorite-btn svg path {
+  fill: currentColor;
+}
+
+/* Đổi màu khi đã yêu thích */
+.favorite-btn.is-favorite {
+  color: #1DB954; /* Màu xanh lá của Spotify */
+}
+
+/* Hiển thị nút yêu thích khi hover vào track */
+.track-row .track-actions {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.track-row:hover .track-actions {
+  opacity: 1;
+}

@@ -1,6 +1,7 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef, useState, createContext, useContext } from "react"
+import api from "../services/api"
 
 const MusicPlayerContext = createContext()
 
@@ -23,6 +24,8 @@ export const MusicPlayerProvider = ({ children }) => {
   const [progress, setProgress] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [currentIndex, setCurrentIndex] = useState(-1)
+  const [favorites, setFavorites] = useState([])
 
   // Queue management
   const [queue, setQueue] = useState([])
@@ -35,50 +38,36 @@ export const MusicPlayerProvider = ({ children }) => {
   // Audio element reference
   const audioRef = useRef(null)
 
-  // Initialize audio element
   useEffect(() => {
-    audioRef.current = new Audio()
-
-    const handleTimeUpdate = () => {
-      if (!audioRef.current) return
-      const current = audioRef.current.currentTime
-      const duration = audioRef.current.duration
-      setCurrentTime(current)
-      setProgress((current / duration) * 100 || 0)
+    const fetchFavorites = async () => {
+      try {
+        const response = await api.getFavoriteTracks()
+        setFavorites(response.data || [])
+      } catch (error) {
+        console.error("Error fetching favorites:", error)
+      }
     }
-
-    const handleMetadataLoaded = () => {
-      if (!audioRef.current) return
-      setDuration(audioRef.current.duration)
-    }
-
-    const handleTrackEnd = () => {
-      if (repeat === "one") {
-        audioRef.current.currentTime = 0
-        audioRef.current.play().catch(console.error)
+    fetchFavorites()
+  }, [])
+  const toggleFavorite = async (trackId) => {
+    try {
+      if (favorites.some(track => track.id === trackId)) {
+        await api.removeFavoriteTrack(trackId)
+        setFavorites(favorites.filter(track => track.id !== trackId))
       } else {
-        playNextTrack()
+        // Cần thêm logic lấy thông tin bài hát nếu cần
+        await api.addFavoriteTrack(trackId)
+        // Giả sử bạn có hàm getTrackDetail
+        const trackDetail = await api.getTrackDetail(trackId)
+        setFavorites([...favorites, trackDetail.data])
       }
+    } catch (error) {
+      console.error("Error toggling favorite:", error)
     }
-
-    audioRef.current.addEventListener("timeupdate", handleTimeUpdate)
-    audioRef.current.addEventListener("ended", handleTrackEnd)
-    audioRef.current.addEventListener("loadedmetadata", handleMetadataLoaded)
-
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.removeEventListener("timeupdate", handleTimeUpdate)
-        audioRef.current.removeEventListener("ended", handleTrackEnd)
-        audioRef.current.removeEventListener("loadedmetadata", handleMetadataLoaded)
-        audioRef.current.pause()
-      }
-    }
-  }, [repeat])
-
+  }
   useEffect(() => {
     if (!audioRef.current || !currentTrack) return
     
-    console.log("Current track:", currentTrack)
     const playAudio = async () => {
       try {
         setIsLoading(true)
@@ -128,99 +117,136 @@ export const MusicPlayerProvider = ({ children }) => {
     audioRef.current.volume = isMuted ? 0 : volume
   }, [volume, isMuted])
 
-  // Player controls
-  const playTrack = async (track, tracks = []) => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      
-      if (currentTrack) {
-        setHistory((prev) => [currentTrack, ...prev.slice(0, 19)])
-      }
-
-      setCurrentTrack({
-        ...track,
-        contextTracks: tracks.length > 0 ? tracks : track.contextTracks || []
-      })
-
-      // Update queue if context tracks are provided
-      if (tracks.length > 0 || track.contextTracks) {
-        const contextTracks = tracks.length > 0 ? tracks : track.contextTracks
-        const remainingTracks = contextTracks.filter(t => t.id !== track.id)
-        setQueue(shuffle ? shuffleArray([...remainingTracks]) : remainingTracks)
-      }
-      
-      setIsPlaying(true)
-    } catch (err) {
-      setError(err.message)
-      setIsPlaying(false)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   const togglePlay = () => {
     if (!currentTrack) return
     setIsPlaying((prev) => !prev)
   }
-
-  const playNextTrack = () => {
-    if (queue.length === 0) {
-      if (repeat === "all" && history.length > 0) {
-        // Restart from the beginning if repeat all is enabled
-        const allTracks = [...history, currentTrack].reverse()
-        playTrack(allTracks[0], allTracks.slice(1))
-      } else {
-        setIsPlaying(false)
-      }
-      return
-    }
-
-    const nextTrack = queue[0]
-    const newQueue = queue.slice(1)
-
-    if (currentTrack) {
-      setHistory((prev) => [currentTrack, ...prev.slice(0, 19)])
-    }
-
-    setCurrentTrack(nextTrack)
-    setQueue(newQueue)
-    setIsPlaying(true)
-  }
-
-  const playPreviousTrack = () => {
-    // If we're more than 3 seconds into the song, restart it
-    if (audioRef.current && audioRef.current.currentTime > 3) {
-      audioRef.current.currentTime = 0
-      return
-    }
-
-    // Otherwise play the previous track from history
-    if (history.length > 0) {
-      const prevTrack = history[0]
-      const newHistory = history.slice(1)
-
-      // Add current track to the beginning of the queue
-      setQueue((prev) => (currentTrack ? [currentTrack, ...prev] : [...prev]))
-      setCurrentTrack(prevTrack)
-      setHistory(newHistory)
-      setIsPlaying(true)
-    } else {
-      // If no history, just restart the current track
+  // Player controls
+  const playTrack = useCallback(async (track, tracks = []) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+  
+      // Dừng và reset audio hiện tại
       if (audioRef.current) {
-        audioRef.current.currentTime = 0
+        audioRef.current.pause();
+        audioRef.current.src = "";
       }
+  
+      // Tạo audio element mới
+      const audio = new Audio();
+      audioRef.current = audio;
+      
+      // Reset thời gian
+      setCurrentTime(0);
+      setProgress(0);
+  
+      // Thiết lập source và sự kiện
+      audio.src = track.audio;
+      audio.volume = isMuted ? 0 : volume;
+      audio.load();
+  
+      // Phát nhạc
+      await audio.play();
+      
+      // Cập nhật state
+      setCurrentTrack({
+        ...track,
+        contextTracks: tracks,
+        contextUri: track.contextUri || `player:${track.id}`
+      });
+      setQueue(tracks.slice(tracks.findIndex(t => t.id === track.id) + 1));
+      setHistory(prev => [currentTrack, ...prev].slice(0, 50));
+      setIsPlaying(true);
+  
+    } catch (err) {
+      console.error("Play error:", err);
+      setError(err.message);
+      setIsPlaying(false);
+    } finally {
+      setIsLoading(false);
     }
-  }
+  }, [currentTrack, isMuted, volume]);
+  useEffect(() => {
+    return () => {
+      // Dọn dẹp khi component unmount
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+        audioRef.current = null;
+      }
+    };
+  }, []);
+  const playNextTrack = useCallback(async () => {
+    if (queue.length > 0) {
+      // Chuyển đến bài tiếp theo trong queue
+      await playTrack(queue[0], currentTrack?.contextTracks);
+    } else if (repeat === "all" && currentTrack?.contextTracks?.length > 0) {
+      // Lặp lại từ đầu danh sách
+      await playTrack(
+        currentTrack.contextTracks[0], 
+        currentTrack.contextTracks
+      );
+    } else {
+      setIsPlaying(false);
+    }
+  }, [queue, currentTrack, repeat, playTrack]);
+    // Initialize audio element
+    useEffect(() => {
+      const audio = audioRef.current;
+      if (!audio) return;
+    
+      const handleTimeUpdate = () => {
+        if (!isNaN(audio.duration)) {
+          setCurrentTime(audio.currentTime);
+          setProgress((audio.currentTime / audio.duration) * 100);
+        }
+      };
+    
+      const handleLoadedMetadata = () => {
+        setDuration(audio.duration);
+      };
+    
+      const handleEnded = () => {
+        playNextTrack();
+      };
+    
+      audio.addEventListener('timeupdate', handleTimeUpdate);
+      audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.addEventListener('ended', handleEnded);
+    
+      return () => {
+        audio.removeEventListener('timeupdate', handleTimeUpdate);
+        audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        audio.removeEventListener('ended', handleEnded);
+      };
+    }, [playNextTrack]);
+  const playPreviousTrack = useCallback(async () => {
+    // Nếu đang phát >3s thì reset về đầu bài
+    if (audioRef.current?.currentTime > 3) {
+      audioRef.current.currentTime = 0;
+      return;
+    }
+  
+    // Chuyển về bài trước từ history
+    if (history.length > 0) {
+      await playTrack(history[0], currentTrack?.contextTracks || []);
+    }
+  }, [history, currentTrack, playTrack]);
+  useEffect(() => {
+    if (shuffle && queue.length > 0) {
+      setQueue(prev => shuffleArray([...prev]))
+    }
+  }, [shuffle])
 
-  const seekToPosition = (percent) => {
-    if (!audioRef.current || !duration) return
-
-    const time = (percent / 100) * duration
-    audioRef.current.currentTime = time
-    setCurrentTime(time)
-    setProgress(percent)
-  }
+  const seekToPosition = useCallback((percent) => {
+    if (!audioRef.current || isNaN(duration)) return;
+    
+    const seekTime = (percent / 100) * duration;
+    audioRef.current.currentTime = seekTime;
+    setCurrentTime(seekTime);
+    setProgress(percent);
+  }, [duration]);
 
   const toggleMute = () => {
     setIsMuted((prev) => !prev)
@@ -248,7 +274,8 @@ export const MusicPlayerProvider = ({ children }) => {
       return "off"
     })
   }
-
+  useEffect(() => {;
+  }, [currentTrack, queue, history]);
   const addToQueue = (track) => {
     setQueue((prev) => [...prev, track])
   }
@@ -291,6 +318,7 @@ export const MusicPlayerProvider = ({ children }) => {
     repeat,
     isLoading,
     error,
+    favorites,
 
     // Player controls
     playTrack,
@@ -304,6 +332,7 @@ export const MusicPlayerProvider = ({ children }) => {
     toggleRepeat,
     addToQueue,
     clearQueue,
+    toggleFavorite,
 
     // Utilities
     formatTime,

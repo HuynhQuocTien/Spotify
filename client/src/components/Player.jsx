@@ -6,6 +6,8 @@ import "./Player.css"
 
 const Player = () => {
   const {
+    queue,
+    history,
     currentTrack,
     isPlaying,
     volume,
@@ -27,7 +29,9 @@ const Player = () => {
   } = useMusicPlayer()
 
   const [showVolume, setShowVolume] = useState(false)
-
+  const [showQueue, setShowQueue] = useState(false)
+  useEffect(() => {
+  }, [currentTime, duration, progress]);
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.code === "Space" && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
@@ -65,10 +69,23 @@ const Player = () => {
   }
 
   const handleProgressChange = (e) => {
-    const newProgress = Number.parseFloat(e.target.value)
-    seekToPosition(newProgress)
-  }
-
+    const newProgress = Number(e.target.value);
+    if (!isNaN(newProgress)) {
+      seekToPosition(newProgress);
+    }
+  };
+  const renderQueueButton = () => (
+    <button 
+      className={`queue-button ${showQueue ? 'active' : ''}`}
+      onClick={() => setShowQueue(!showQueue)}
+      title="Show queue"
+    >
+      <svg viewBox="0 0 24 24">
+        <path d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+      {queue.length > 0 && <span className="queue-count">{queue.length}</span>}
+    </button>
+  )
   const handleVolumeChange = (e) => {
     const newVolume = Number.parseFloat(e.target.value)
     changeVolume(newVolume)
@@ -107,6 +124,7 @@ const Player = () => {
 
       <div className="player-center">
         <div className="player-controls">
+        {renderQueueButton()}
           <button
             className={`shuffle-button ${shuffle ? "active" : ""}`}
             onClick={toggleShuffle}
@@ -213,6 +231,35 @@ const Player = () => {
             )}
           </button>
         </div>
+        {showQueue && (
+          <div className="queue-panel">
+            <div className="queue-header">
+              <h4>Next in queue</h4>
+              <button onClick={() => setShowQueue(false)}>×</button>
+            </div>
+            <div className="queue-list">
+              {queue.map((track, index) => (
+                <div key={`${track.id}-${index}`} className="queue-item">
+                  <span className="queue-index">{index + 1}</span>
+                  <img 
+                    src={track.image || '/placeholder.svg'} 
+                    alt={track.name}
+                    className="queue-artwork"
+                  />
+                  <div className="queue-info">
+                    <div className="queue-name">{track.name}</div>
+                    <div className="queue-artist">
+                      {track.artists?.map(a => a.name).join(', ')}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {queue.length === 0 && (
+                <div className="queue-empty">Queue is empty</div>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="progress-container">
           <span className="time current">{formatTime(currentTime)}</span>
