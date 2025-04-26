@@ -9,15 +9,15 @@ export const usePlayer = () => {
 }
 
 export const PlayerProvider = ({ children }) => {
-  const [currentTrack, setCurrentTrack] = useState(null)
+  const [currentSong, setCurrentSong] = useState(null)
   const [queue, setQueue] = useState([])
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [volume, setVolume] = useState(0.7)
 
-  const playTrack = (track, tracks = []) => {
-    setCurrentTrack(track)
-    setQueue(tracks.filter((t) => t.id !== track.id))
+  const playSong = (song, songs = []) => {
+    setCurrentSong(song)
+    setQueue(songs.filter((t) => t.id !== song.id))
     setIsPlaying(true)
   }
 
@@ -25,28 +25,28 @@ export const PlayerProvider = ({ children }) => {
     setIsPlaying(!isPlaying)
   }
 
-  const nextTrack = () => {
+  const nextSong = () => {
     if (queue.length === 0) {
       setIsPlaying(false)
       return
     }
 
-    const nextTrack = queue[0]
-    setCurrentTrack(nextTrack)
+    const nextSong = queue[0]
+    setCurrentSong(nextSong)
     setQueue(queue.slice(1))
     setIsPlaying(true)
   }
 
-  const prevTrack = () => {
-    // This is simplified - a real implementation would need to track history
-    if (!currentTrack) return
+  const prevSong = () => {
+    // This is simplified - a real implementation would need to song history
+    if (!currentSong) return
 
-    // For now, just restart the current track
+    // For now, just restart the current song
     setProgress(0)
   }
 
-  const addToQueue = (track) => {
-    setQueue([...queue, track])
+  const addToQueue = (song) => {
+    setQueue([...queue, song])
   }
 
   const clearQueue = () => {
@@ -54,15 +54,15 @@ export const PlayerProvider = ({ children }) => {
   }
 
   const value = {
-    currentTrack,
+    currentSong,
     queue,
     isPlaying,
     progress,
     volume,
-    playTrack,
+    playSong,
     togglePlay,
-    nextTrack,
-    prevTrack,
+    nextSong,
+    prevSong,
     addToQueue,
     clearQueue,
     setProgress,

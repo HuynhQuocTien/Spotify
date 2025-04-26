@@ -1,0 +1,132 @@
+/* .song-page {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .song-header {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 40px;
+  }
+  
+  .song-cover {
+    flex: 0 0 300px;
+  }
+  
+  .song-image {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .song-info {
+    flex: 1;
+  }
+  
+  .song-title {
+    font-size: 2.5rem;
+    margin: 0 0 10px;
+  }
+  
+  .song-artists {
+    margin-bottom: 15px;
+  }
+  
+  .artist-link {
+    color: var(--primary-color);
+    text-decoration: none;
+  }
+  
+  .song-album {
+    margin-bottom: 15px;
+    color: var(--text-secondary);
+  }
+  
+  .song-meta {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    color: var(--text-secondary);
+  }
+  
+  .song-actions {
+    display: flex;
+    gap: 15px;
+  }
+  
+  .play-button {
+    padding: 10px 25px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .play-button.playing {
+    background-color: var(--secondary-color);
+  }
+  
+  .add-to-playlist {
+    padding: 10px 15px;
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .song-details {
+    margin-top: 40px;
+  }
+  
+  .lyrics-section {
+    margin-bottom: 40px;
+  }
+  
+  .lyrics-text {
+    white-space: pre-wrap;
+    font-family: inherit;
+    line-height: 1.6;
+  }
+  
+  .related-songs {
+    margin-top: 40px;
+  }
+  
+  .related-songs h3 {
+    margin-bottom: 20px;
+  }
+  
+  .related-songs-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+  }
+  
+  .related-song-item {
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  
+  .related-song-item:hover {
+    transform: translateY(-5px);
+  }
+  
+  .related-song-image {
+    width: 100%;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+  
+  .related-song-info h4 {
+    margin: 0 0 5px;
+    font-size: 1rem;
+  }
+  
+  .related-song-info p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  } */

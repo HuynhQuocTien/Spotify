@@ -139,13 +139,13 @@
     transform: translateY(0);
   }
   
-  .tracks-list {
+  .songs-list {
     display: flex;
     flex-direction: column;
     gap: 12px;
   }
   
-  .track-item {
+  .song-item {
     display: flex;
     align-items: center;
     padding: 8px;
@@ -153,23 +153,23 @@
     transition: background-color 0.3s ease;
   }
   
-  .track-item:hover {
+  .song-item:hover {
     background-color: #282828;
   }
   
-  .track-image {
+  .song-image {
     width: 40px;
     height: 40px;
     object-fit: cover;
     margin-right: 16px;
   }
   
-  .track-info {
+  .song-info {
     flex: 1;
     min-width: 0;
   }
   
-  .track-name {
+  .song-name {
     display: block;
     font-size: 16px;
     font-weight: 400;
@@ -178,7 +178,7 @@
     text-overflow: ellipsis;
   }
   
-  .track-artist {
+  .song-artist {
     display: block;
     font-size: 14px;
     color: #b3b3b3;
@@ -187,7 +187,7 @@
     text-overflow: ellipsis;
   }
   
-  .track-play-button {
+  .song-play-button {
     width: 32px;
     height: 32px;
     background: none;
@@ -198,12 +198,12 @@
     cursor: pointer;
   }
   
-  .track-play-button svg {
+  .song-play-button svg {
     width: 16px;
     height: 16px;
   }
   
-  .track-item:hover .track-play-button {
+  .song-item:hover .song-play-button {
     opacity: 1;
   }
   

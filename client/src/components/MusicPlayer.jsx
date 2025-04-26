@@ -5,7 +5,7 @@ import { usePlayer } from "../contexts/PlayerContext"
 import { Play, Pause, SkipBack, SkipForward, Volume2, Volume1, VolumeX, Repeat, Shuffle } from "lucide-react"
 
 const MusicPlayer = () => {
-  const { currentTrack, isPlaying, togglePlay, nextTrack, prevTrack, setProgress, progress } = usePlayer()
+  const { currentSong, isPlaying, togglePlay, nextSong, prevSong, setProgress, progress } = usePlayer()
 
   const [volume, setVolume] = useState(0.7)
   const [isMuted, setIsMuted] = useState(false)
@@ -23,7 +23,7 @@ const MusicPlayer = () => {
     } else {
       audioRef.current.pause()
     }
-  }, [isPlaying, currentTrack])
+  }, [isPlaying, currentSong])
 
   useEffect(() => {
     if (!audioRef.current) return
@@ -79,7 +79,7 @@ const MusicPlayer = () => {
     return <Volume2 size={20} />
   }
 
-  if (!currentTrack) {
+  if (!currentSong) {
     return null
   }
 
@@ -87,25 +87,25 @@ const MusicPlayer = () => {
     <div className="fixed bottom-0 left-0 right-0 bg-[#181818] border-t border-[#282828] px-4 py-3">
       <audio
         ref={audioRef}
-        src={currentTrack.preview_url || currentTrack.audio}
+        src={currentSong.preview_url || currentSong.audio}
         onTimeUpdate={handleTimeUpdate}
-        onEnded={nextTrack}
+        onEnded={nextSong}
       />
 
       <div className="flex items-center justify-between max-w-screen-xl mx-auto">
-        {/* Track info */}
+        {/* Song info */}
         <div className="flex items-center w-1/4">
-          {currentTrack.album?.images?.[0]?.url && (
+          {currentSong.album?.images?.[0]?.url && (
             <img
-              src={currentTrack.album.images[0].url || "/placeholder.svg"}
-              alt={currentTrack.name}
+              src={currentSong.album.images[0].url || "/placeholder.svg"}
+              alt={currentSong.name}
               className="w-14 h-14 mr-3 object-cover"
             />
           )}
           <div className="truncate">
-            <div className="text-sm font-medium truncate">{currentTrack.name}</div>
+            <div className="text-sm font-medium truncate">{currentSong.name}</div>
             <div className="text-xs text-gray-400 truncate">
-              {currentTrack.artists?.map((artist) => artist.name).join(", ")}
+              {currentSong.artists?.map((artist) => artist.name).join(", ")}
             </div>
           </div>
         </div>
@@ -119,13 +119,13 @@ const MusicPlayer = () => {
             >
               <Shuffle size={20} />
             </button>
-            <button className="text-gray-400 hover:text-white" onClick={prevTrack}>
+            <button className="text-gray-400 hover:text-white" onClick={prevSong}>
               <SkipBack size={20} />
             </button>
             <button className="bg-white text-black rounded-full p-2 hover:scale-105 transition" onClick={togglePlay}>
               {isPlaying ? <Pause size={20} /> : <Play size={20} />}
             </button>
-            <button className="text-gray-400 hover:text-white" onClick={nextTrack}>
+            <button className="text-gray-400 hover:text-white" onClick={nextSong}>
               <SkipForward size={20} />
             </button>
             <button

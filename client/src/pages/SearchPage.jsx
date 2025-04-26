@@ -61,10 +61,10 @@ const SearchPage = () => {
       
       // Mock search results
       setResults({
-        tracks: {
+        songs: {
           items: [
             {
-              id: 'track1',
+              id: 'song1',
               name: 'Blinding Lights',
               artists: [{ name: 'The Weeknd' }],
               album: { 
@@ -74,7 +74,7 @@ const SearchPage = () => {
               duration_ms: 200000
             },
             {
-              id: 'track2',
+              id: 'song2',
               name: 'Save Your Tears',
               artists: [{ name: 'The Weeknd' }],
               album: { 
@@ -84,7 +84,7 @@ const SearchPage = () => {
               duration_ms: 215000
             },
             {
-              id: 'track3',
+              id: 'song3',
               name: 'Starboy',
               artists: [{ name: 'The Weeknd', id: 'artist1' }, { name: 'Daft Punk', id: 'artist2' }],
               album: { 
@@ -130,7 +130,7 @@ const SearchPage = () => {
             {
               id: 'playlist1',
               name: 'This Is The Weeknd',
-              description: 'All his biggest hits and essential tracks.',
+              description: 'All his biggest hits and essential songs.',
               images: [{ url: '/placeholder.svg?height=160&width=160' }]
             }
           ]
@@ -189,7 +189,7 @@ const SearchPage = () => {
       {results && !loading && (
         <div className="search-results">
           {/* Top result */}
-          {(results.artists?.items.length > 0 || results.tracks?.items.length > 0) && (
+          {(results.artists?.items.length > 0 || results.songs?.items.length > 0) && (
             <div className="search-section">
               <h2 className="search-section-title">Top result</h2>
               <div className="top-result">
@@ -208,16 +208,16 @@ const SearchPage = () => {
                       </svg>
                     </button>
                   </div>
-                ) : results.tracks?.items[0] ? (
-                  <div className="top-result-track">
+                ) : results.songs?.items[0] ? (
+                  <div className="top-result-song">
                     <img 
-                      src={results.tracks.items[0].album.images[0].url || "/placeholder.svg"} 
-                      alt={results.tracks.items[0].name}
+                      src={results.songs.items[0].album.images[0].url || "/placeholder.svg"} 
+                      alt={results.songs.items[0].name}
                       className="top-result-image"
                     />
-                    <h3 className="top-result-name">{results.tracks.items[0].name}</h3>
+                    <h3 className="top-result-name">{results.songs.items[0].name}</h3>
                     <span className="top-result-artist">
-                      {results.tracks.items[0].artists.map(artist => artist.name).join(', ')}
+                      {results.songs.items[0].artists.map(artist => artist.name).join(', ')}
                     </span>
                     <button className="play-button">
                       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -231,24 +231,24 @@ const SearchPage = () => {
           )}
           
           {/* Songs */}
-          {results.tracks?.items.length > 0 && (
+          {results.songs?.items.length > 0 && (
             <div className="search-section">
               <h2 className="search-section-title">Songs</h2>
-              <div className="tracks-list">
-                {results.tracks.items.map(track => (
-                  <div key={track.id} className="track-item">
+              <div className="songs-list">
+                {results.songs.items.map(song => (
+                  <div key={song.id} className="song-item">
                     <img 
-                      src={track.album.images[0].url || "/placeholder.svg"} 
-                      alt={track.name}
-                      className="track-image"
+                      src={song.album.images[0].url || "/placeholder.svg"} 
+                      alt={song.name}
+                      className="song-image"
                     />
-                    <div className="track-info">
-                      <span className="track-name">{track.name}</span>
-                      <span className="track-artist">
-                        {track.artists.map(artist => artist.name).join(', ')}
+                    <div className="song-info">
+                      <span className="song-name">{song.name}</span>
+                      <span className="song-artist">
+                        {song.artists.map(artist => artist.name).join(', ')}
                       </span>
                     </div>
-                    <button className="track-play-button">
+                    <button className="song-play-button">
                       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M8 5.14v14l11-7-11-7z" fill="currentColor" />
                       </svg>
@@ -328,7 +328,7 @@ const SearchPage = () => {
           )}
           
           {/* No results */}
-          {!results.tracks?.items.length &&
+          {!results.songs?.items.length &&
             !results.artists?.items.length &&
             !results.albums?.items.length &&
             !results.playlists?.items.length && (

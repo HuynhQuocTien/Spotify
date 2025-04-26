@@ -101,11 +101,11 @@
     height: 24px;
   }
   
-  .playlist-tracks {
+  .playlist-songs {
     padding: 0 32px;
   }
   
-  .tracks-header {
+  .songs-header {
     display: grid;
     grid-template-columns: 16px 4fr 2fr 2fr 1fr;
     gap: 16px;
@@ -122,11 +122,11 @@
     fill: currentColor;
   }
   
-  .tracks-list {
+  .songs-list {
     margin-top: 16px;
   }
   
-  .track-item {
+  .song-item {
     display: grid;
     grid-template-columns: 16px 4fr 2fr 2fr 1fr;
     gap: 16px;
@@ -136,22 +136,22 @@
     font-size: 14px;
   }
   
-  .track-item:hover {
+  .song-item:hover {
     background-color: rgba(255, 255, 255, 0.1);
   }
   
-  .track-number {
+  .song-number {
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
   }
   
-  .track-index {
+  .song-index {
     display: block;
   }
   
-  .track-play-button {
+  .song-play-button {
     position: absolute;
     width: 16px;
     height: 16px;
@@ -163,51 +163,51 @@
     cursor: pointer;
   }
   
-  .track-play-button svg {
+  .song-play-button svg {
     width: 16px;
     height: 16px;
   }
   
-  .track-item:hover .track-index {
+  .song-item:hover .song-index {
     display: none;
   }
   
-  .track-item:hover .track-play-button {
+  .song-item:hover .song-play-button {
     display: block;
   }
   
-  .track-title {
+  .song-title {
     display: flex;
     align-items: center;
     min-width: 0;
   }
   
-  .track-image {
+  .song-image {
     width: 40px;
     height: 40px;
     object-fit: cover;
     margin-right: 16px;
   }
   
-  .track-info {
+  .song-info {
     min-width: 0;
   }
   
-  .track-name {
+  .song-name {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   
-  .track-artist {
+  .song-artist {
     color: #b3b3b3;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   
-  .track-album,
-  .track-date-added {
+  .song-album,
+  .song-date-added {
     color: #b3b3b3;
     white-space: nowrap;
     overflow: hidden;
@@ -216,7 +216,7 @@
     align-items: center;
   }
   
-  .track-duration {
+  .song-duration {
     color: #b3b3b3;
     display: flex;
     align-items: center;
@@ -265,12 +265,12 @@
       font-size: 72px;
     }
   
-    .tracks-header,
-    .track-item {
+    .songs-header,
+    .song-item {
       grid-template-columns: 16px 4fr 2fr 1fr;
     }
   
-    .track-date-added {
+    .song-date-added {
       display: none;
     }
   }
@@ -301,16 +301,16 @@
       padding: 16px;
     }
   
-    .playlist-tracks {
+    .playlist-songs {
       padding: 0 16px;
     }
   
-    .tracks-header,
-    .track-item {
+    .songs-header,
+    .song-item {
       grid-template-columns: 16px 4fr 1fr;
     }
   
-    .track-album {
+    .song-album {
       display: none;
     }
   }
@@ -325,8 +325,8 @@
       font-size: 32px;
     }
   
-    .tracks-header,
-    .track-item {
+    .songs-header,
+    .song-item {
       grid-template-columns: 16px 4fr auto;
       gap: 8px;
     }

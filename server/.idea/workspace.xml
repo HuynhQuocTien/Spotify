@@ -4,38 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7784712c-c114-4f41-843e-ce3b0b975991" name="Changes" comment="feat: Enhance music player functionality with improved track handling, UI updates, and new API integrations">
-      <change beforePath="$PROJECT_DIR$/../client/src/components/HeartFilledIcon.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/HeartFilledIcon.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/components/Player.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Player.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/components/Player.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Player.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/components/Section.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Section.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/contexts/MusicPlayerContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/contexts/MusicPlayerContext.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/AlbumPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/AlbumPage.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/AlbumPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/AlbumPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/AllTrackPage.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/AllTrackPage.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/ArtistPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/ArtistPage.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/ArtistPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/ArtistPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/FavoritesPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/FavoritesPage.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/FavoritesPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/FavoritesPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/HomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/HomePage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/LibraryPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/LibraryPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/PlaylistPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/PlaylistPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/TrackPage.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/TrackPage.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/UserAlbumPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/UserAlbumPage.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/UserAlbumPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/UserAlbumPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/UserAlbumsPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/UserAlbumsPage.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/UserAlbumsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/UserAlbumsPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/routes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/routes.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/services/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/services/api.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/music/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/music/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/music/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/music/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/music/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/views.py" afterDir="false" />
+    <list default="true" id="7784712c-c114-4f41-843e-ce3b0b975991" name="Changes" comment="refactor: Rename track-related terminology to song in models, components, and styles">
+      <change beforePath="$PROJECT_DIR$/../client/src/components/MusicPlayer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/MusicPlayer.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/components/SongList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/SongList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/contexts/PlayerContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/contexts/PlayerContext.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/pages/PlaylistPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/PlaylistPage.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/pages/SearchPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/SearchPage.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/pages/SearchPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/SearchPage.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -164,7 +139,7 @@
       <workItem from="1745322519128" duration="4763000" />
       <workItem from="1745463193462" duration="1930000" />
       <workItem from="1745586254272" duration="14085000" />
-      <workItem from="1745635435123" duration="17626000" />
+      <workItem from="1745635435123" duration="17931000" />
     </task>
     <task id="LOCAL-00001" summary="init server">
       <option name="closed" value="true" />
@@ -310,7 +285,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744627601152</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="refactor: Rename track-related terminology to song in models, components, and styles">
+      <option name="closed" value="true" />
+      <created>1745675115726</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1745675115726</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -344,6 +327,7 @@
     <MESSAGE value="push: db" />
     <MESSAGE value="feat: Implement ChatHistory model and password reset functionality with OTP" />
     <MESSAGE value="feat: Enhance music player functionality with improved track handling, UI updates, and new API integrations" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: Enhance music player functionality with improved track handling, UI updates, and new API integrations" />
+    <MESSAGE value="refactor: Rename track-related terminology to song in models, components, and styles" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor: Rename track-related terminology to song in models, components, and styles" />
   </component>
 </project>

@@ -3,19 +3,19 @@
 import { useState } from "react"
 import { useMusicPlayer } from "../contexts/MusicPlayerContext"
 
-const SongList = ({ tracks, showAlbum = true, showDateAdded = true, showDuration = true }) => {
-  const { currentTrack, isPlaying, playTrack, formatTime } = useMusicPlayer()
+const SongList = ({ songs, showAlbum = true, showDateAdded = true, showDuration = true }) => {
+  const { currentSong, isPlaying, playSong, formatTime } = useMusicPlayer()
 
   const [hoveredIndex, setHoveredIndex] = useState(null)
 
-  const handlePlayTrack = (track, index) => {
-    // Play the clicked track and add the rest to the queue
-    const tracksAfterCurrent = tracks.slice(index + 1)
-    const tracksBeforeCurrent = tracks.slice(0, index)
+  const handlePlaySong = (song, index) => {
+    // Play the clicked song and add the rest to the queue
+    const songsAfterCurrent = songs.slice(index + 1)
+    const songsBeforeCurrent = songs.slice(0, index)
 
-    // Combine tracks to create a queue that starts from the clicked track
-    // and continues with the rest of the tracks in order
-    playTrack(track, [...tracksAfterCurrent, ...tracksBeforeCurrent])
+    // Combine songs to create a queue that starts from the clicked song
+    // and continues with the rest of the songs in order
+    playSong(song, [...songsAfterCurrent, ...songsBeforeCurrent])
   }
 
   return (
@@ -47,18 +47,18 @@ const SongList = ({ tracks, showAlbum = true, showDateAdded = true, showDuration
           </tr>
         </thead>
         <tbody>
-          {tracks.map((track, index) => (
+          {songs.map((song, index) => (
             <tr
-              key={track.id}
-              className={`hover:bg-[#282828] group ${currentTrack?.id === track.id ? "text-green-500" : ""}`}
+              key={song.id}
+              className={`hover:bg-[#282828] group ${currentSong?.id === song.id ? "text-green-500" : ""}`}
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
             >
               <td className="py-2 px-2">
                 <div className="relative w-4 h-4 flex items-center justify-center">
                   {hoveredIndex === index ? (
-                    <button className="text-white" onClick={() => handlePlayTrack(track, index)}>
-                      {currentTrack?.id === track.id && isPlaying ? (
+                    <button className="text-white" onClick={() => handlePlaySong(song, index)}>
+                      {currentSong?.id === song.id && isPlaying ? (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           viewBox="0 0 24 24"
@@ -80,8 +80,8 @@ const SongList = ({ tracks, showAlbum = true, showDateAdded = true, showDuration
                       )}
                     </button>
                   ) : (
-                    <span className={currentTrack?.id === track.id ? "text-green-500" : ""}>
-                      {currentTrack?.id === track.id && isPlaying ? (
+                    <span className={currentSong?.id === song.id ? "text-green-500" : ""}>
+                      {currentSong?.id === song.id && isPlaying ? (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           viewBox="0 0 24 24"
@@ -100,28 +100,28 @@ const SongList = ({ tracks, showAlbum = true, showDateAdded = true, showDuration
               <td className="py-2">
                 <div className="flex items-center">
                   <img
-                    src={track.album?.images?.[0]?.url || "/placeholder.svg"}
-                    alt={track.name}
+                    src={song.album?.images?.[0]?.url || "/placeholder.svg"}
+                    alt={song.name}
                     className="w-10 h-10 mr-3 object-cover"
                   />
                   <div>
-                    <div className={`font-medium ${currentTrack?.id === track.id ? "text-green-500" : ""}`}>
-                      {track.name}
+                    <div className={`font-medium ${currentSong?.id === song.id ? "text-green-500" : ""}`}>
+                      {song.name}
                     </div>
                     <div className="text-sm text-gray-400">
-                      {track.artists?.map((artist) => artist.name).join(", ")}
+                      {song.artists?.map((artist) => artist.name).join(", ")}
                     </div>
                   </div>
                 </div>
               </td>
-              {showAlbum && <td className="py-2 text-gray-400">{track.album?.name}</td>}
+              {showAlbum && <td className="py-2 text-gray-400">{song.album?.name}</td>}
               {showDateAdded && (
                 <td className="py-2 text-gray-400">
-                  {track.added_at ? new Date(track.added_at).toLocaleDateString() : ""}
+                  {song.added_at ? new Date(song.added_at).toLocaleDateString() : ""}
                 </td>
               )}
               {showDuration && (
-                <td className="py-2 text-gray-400 text-right pr-4">{formatTime(track.duration_ms / 1000)}</td>
+                <td className="py-2 text-gray-400 text-right pr-4">{formatTime(song.duration_ms / 1000)}</td>
               )}
             </tr>
           ))}
