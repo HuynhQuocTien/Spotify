@@ -380,6 +380,7 @@ class FavoritesSerializer(serializers.Serializer):
             return []
 
 class UserAlbumSerializer(serializers.ModelSerializer):
+    songs = SongSerializer(many=True, read_only=True)
     class Meta:
         model = UserAlbum
         fields = ['id', 'user', 'title', 'description', 'cover_image', 'songs', 'created_at']

@@ -705,8 +705,9 @@ class UserAlbumViewSet(viewsets.ModelViewSet):
         try:
             song = Song.objects.get(id=song_id)
             album.songs.add(song)
+            song_serializer = SongSerializer(song)
             return Response(
-                {'status': 'Song added to album'},
+                {'status': 'Song added to album', 'song': song_serializer.data},
                 status=status.HTTP_200_OK
             )
         except Song.DoesNotExist:
@@ -739,3 +740,5 @@ class UserAlbumViewSet(viewsets.ModelViewSet):
                 {'error': 'Song not found'},
                 status=status.HTTP_404_NOT_FOUND
             )
+
+

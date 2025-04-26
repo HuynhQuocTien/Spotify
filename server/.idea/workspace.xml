@@ -5,12 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7784712c-c114-4f41-843e-ce3b0b975991" name="Changes" comment="refactor: Rename track-related terminology to song in models, components, and styles">
-      <change beforePath="$PROJECT_DIR$/../client/src/components/MusicPlayer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/MusicPlayer.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/components/SongList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/SongList.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/contexts/PlayerContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/contexts/PlayerContext.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/PlaylistPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/PlaylistPage.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/SearchPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/SearchPage.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/SearchPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/SearchPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/components/Section.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Section.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/components/Sidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Sidebar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/contexts/MusicPlayerContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/contexts/MusicPlayerContext.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/pages/ArtistPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/ArtistPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/pages/FavoritesPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/FavoritesPage.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/pages/FavoritesPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/FavoritesPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/pages/UserAlbumsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/UserAlbumsPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/routes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/routes.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/services/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/services/api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/music/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/music/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -139,7 +146,8 @@
       <workItem from="1745322519128" duration="4763000" />
       <workItem from="1745463193462" duration="1930000" />
       <workItem from="1745586254272" duration="14085000" />
-      <workItem from="1745635435123" duration="17931000" />
+      <workItem from="1745635435123" duration="21095000" />
+      <workItem from="1745682744442" duration="11074000" />
     </task>
     <task id="LOCAL-00001" summary="init server">
       <option name="closed" value="true" />
@@ -293,7 +301,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745675115726</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="refactor: Rename track-related terminology to song in models, components, and styles">
+      <option name="closed" value="true" />
+      <created>1745675125313</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1745675125313</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
