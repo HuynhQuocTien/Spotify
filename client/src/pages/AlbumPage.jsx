@@ -1,58 +1,53 @@
 import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { useMusicPlayer } from "../contexts/MusicPlayerContext"
-import axios from "axios"
 import api from "../services/api"
-import "./PlaylistPage.css"
+import "./AlbumPage.css"
 import JSZip from "jszip"
 import { saveAs } from "file-saver"
 import HeartFilledIcon from '../components/HeartFilledIcon';
 import HeartOutlineIcon from '../components/HeartOutlineIcon';
+
 const AlbumPage = () => {
   const { id } = useParams()
   const [album, setAlbum] = useState(null)
   const [songs, setSongs] = useState([])
   const [loading, setLoading] = useState(true)
   const [downloadingAll, setDownloadingAll] = useState(false)
-  const { playSong, currentSong, togglePlay } = useMusicPlayer()
-  const [favorites, setFavorites] = useState([])
+  const { playSong, currentSong, togglePlay,updateFavorites } = useMusicPlayer()
+  const [cssLoaded, setCssLoaded] = useState(false)
 
   const FAVORITE_TYPE = {
     SONG: 'song',
     ALBUM: 'album'
   };
-  const isFavorite = (songId, type) => {
-    if (!favorites || typeof favorites !== 'object') return false;
-  
-    if (type === 'song') {
-      console.log(favorites.songs?.some((fav) => fav.id === songId));
-      return favorites.songs?.some((fav) => fav.id === songId);
-    }
-  
-    if (type === 'album') {
-      return favorites.albums?.some((fav) => fav.id === songId);
-    }
-  
-    return false;
-  };
+
+  // Thêm vào hàm handleToggleFavorite
   const handleToggleFavorite = async (e, songId, isCurrentlyFavorite, type) => {
     e.stopPropagation();
-    setTopSongs(prev => 
-      prev.map(song => 
-        song.id === song 
-          ? { ...song, is_favorite: !isCurrentlyFavorite } 
-          : song
-      )
-    );
+    const newState = !isCurrentlyFavorite;
+
+    // Optimistic UI update
+    setSongs(prev => prev.map(song =>
+      song.id === songId ? { ...song, is_favorite: newState } : song
+    ));
+
+    // Update localStorage
+    localStorage.setItem(`favorite_${type}_${songId}`, JSON.stringify(newState));
+
     try {
-        await api.addFavoriteSong(songId, type);
-  
-      setTopSongs((prev) =>
-        prev.map((t) =>
-          t.id === songId ? { ...t, is_favorite: !t.isCurrentlyFavorite } : t
-        )
-      );
+      // Gọi API để đồng bộ với server
+      await api.addFavoriteSong(songId, type);
+
+      // Cập nhật context nếu cần
+      updateFavorites && updateFavorites(songId, type, newState ? 'add' : 'remove');
     } catch (err) {
+      // Rollback nếu có lỗi
+      setSongs(prev => prev.map(song =>
+        song.id === songId ? { ...song, is_favorite: isCurrentlyFavorite } : song
+      ));
+      localStorage.setItem(`favorite_${type}_${songId}`, JSON.stringify(isCurrentlyFavorite));
+
       console.error('Toggle favorite failed:', err);
     }
   };
@@ -68,55 +63,49 @@ const AlbumPage = () => {
           api.getAlbum(id),
           api.getAlbumSongs(id)
         ])
-        setAlbum(albumRes.data)
-        setSongs(songsRes.data.songs)
-        console.log("Album data:", albumRes.data)
-        console.log("Songs data:", songsRes.data.songs)
+        setAlbum(albumRes.data || [])
+        setSongs(songsRes.data || [])
       } catch (error) {
         console.error("Error fetching album or songs:", error)
       } finally {
         setLoading(false)
       }
     }
-  
+
     fetchAlbumAndSongs()
   }, [id])
-  
 
-  const handlePlaySong= (song, index) => {
+
+  const handlePlaySong = async (song, index) => {
     if (!song || !songs || songs.length === 0) return
-  
+
     if (currentSong?.id === song.id) {
       togglePlay()
       return
     }
-  
+
     const contextUri = `album:${album.id}`
     const contextSongs = songs
-  
-    playSong({
-      id: song.id,
-      name: song.name,
-      artists: song.artists || [],
-      album: album
-        ? { name: album.title, image: album.cover_image }
-        : { name: '', image: '' },
-      duration: song.duration || song.duration_ms || 0,
-      audio: song.audio_file || song.preview_url,
-      image: song.image || album.cover_image,
-      contextUri,
-      contextSongs
-    })
+    try {
+      await playSong({
+        ...song,
+        audio: song.audio_file,
+        contextSongs: songs,
+        contextUri: `artist:${id}:song:${song.id}`,
+      });
+    } catch (err) {
+      console.error('Playback failed:', err);
+    }
   }
 
   const downloadAllSongs = async () => {
     if (!songs.length || downloadingAll) return
-    
+
     setDownloadingAll(true)
     try {
       const zip = new JSZip()
       const folder = zip.folder(`${album.title} - ${album.artist.name}`)
-      
+
       // Add cover image to the zip
       if (album.cover_image) {
         try {
@@ -127,7 +116,7 @@ const AlbumPage = () => {
           console.error("Error downloading cover image:", error)
         }
       }
-      
+
       // Add all songs to the zip
       for (let i = 0; i < songs.length; i++) {
         const song = songs[i]
@@ -143,7 +132,7 @@ const AlbumPage = () => {
           }
         }
       }
-      
+
       // Generate the zip file
       const content = await zip.generateAsync({ type: "blob" })
       saveAs(content, `${album.title} - ${album.artist.name}.zip`)
@@ -164,7 +153,25 @@ const AlbumPage = () => {
     const date = new Date(dateString)
     return date.getFullYear()
   }
+  const downloadSong = async (e, song) => {
+    e.stopPropagation();
+    e.preventDefault();
 
+    try {
+      const response = await fetch(song.audio_file);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${song.title}.mp3`; // hoặc lấy extension từ URL
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
+  };
   if (loading) {
     return <div className="playlist-loading"><div className="loading-spinner" /></div>
   }
@@ -199,8 +206,8 @@ const AlbumPage = () => {
         {songs.length > 0 && (
           <>
             <button className="play-all-button" onClick={() => handlePlaySong(songs[0], 0)}> <svg viewBox="0 0 24 24" fill="none"><path d="M8 5.14v14l11-7-11-7z" fill="currentColor" /></svg> </button>
-            <button 
-              className="download-all-button" 
+            <button
+              className="download-all-button"
               onClick={downloadAllSongs}
               disabled={downloadingAll}
             >
@@ -241,41 +248,38 @@ const AlbumPage = () => {
                   <svg viewBox="0 0 24 24" fill="none"><path d="M8 5.14v14l11-7-11-7z" fill="currentColor" /></svg>
                 </button>
               </div>
-            
+
               <div className="song-title album-song-title">
                 <div className="song-info">
                   <div className="song-name">{song.title}</div>
                   <div className="song-artist">{song.artists[0].name}</div>
                 </div>
               </div>
-            
+
               <div className="song-duration">{song.duration}</div>
-            
-              <div className="song-download">
+
+              <div className="song-download download-button">
                 {song.audio_file && (
-                  <a 
-                    href={song.audio_file} 
-                    download 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
+                  <button
+                    onClick={(e) => downloadSong(e, song)}
                     className="download-button"
                     title="Download"
                   >
                     <svg viewBox="0 0 24 24" fill="none" className="download-icon">
                       <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" fill="currentColor" />
                     </svg>
-                  </a>
+                  </button>
                 )}
-              <button
-                className="favorite-btn"
-                onClick={(e) => handleToggleFavorite(e, song.id, song.is_favorite, 'song')}
-              >
-                {song.is_favorite ? (
-                  <HeartFilledIcon />
-                ) : (
-                  <HeartOutlineIcon />
-                )}
-              </button>
+                <button
+                  className="favorite-btn"
+                  onClick={(e) => handleToggleFavorite(e, song.id, song.is_favorite, FAVORITE_TYPE.SONG)}
+                >
+                  {song.is_favorite ? (
+                    <HeartFilledIcon />
+                  ) : (
+                    <HeartOutlineIcon />
+                  )}
+                </button>
               </div>
             </div>
           ))}

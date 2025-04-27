@@ -2,7 +2,6 @@ import { Routes, Route } from "react-router-dom"
 import HomePage from "./pages/HomePage"
 import SearchPage from "./pages/SearchPage"
 import LibraryPage from "./pages/LibraryPage"
-import PlaylistPage from "./pages/PlaylistPage"
 import AlbumPage from "./pages/AlbumPage"
 import ArtistPage from "./pages/ArtistPage"
 import LoginPage from "./pages/LoginPage"
@@ -20,7 +19,6 @@ const AppRoutes = () => {
       
       <Route path="/" element={<HomePage />} />
       <Route path="/search" element={<SearchPage />} />
-      <Route path="/playlist/:id" element={<PlaylistPage />} />
       <Route path="/album/:id" element={<AlbumPage />} />
       <Route path="/artist/:id" element={<ArtistPage />} />
       <Route path="/song/:id" element={<SongPage />} />

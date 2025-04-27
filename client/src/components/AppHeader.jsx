@@ -5,33 +5,18 @@ import { useLocation, useNavigate } from "react-router-dom"
 import api from "../services/api"
 import "./AppHeader.css"
 import LoginPage from "../pages/LoginPage"
+import { useAuth } from "../contexts/AuthContext";
 
 const AppHeader = () => {
+  const { user, logout } = useAuth();
   const location = useLocation()
   const navigate = useNavigate()
   const [scrolled, setScrolled] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [isSearchPage, setIsSearchPage] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"))
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
-  const [userData, setUserData] = useState(null)
   const userMenuRef = useRef(null)
-
-  // Load user data when authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      const fetchUserData = async () => {
-        try {
-          const response = await api.getUserProfile()
-          setUserData(response.data)
-        } catch (error) {
-          console.error("Failed to fetch user data:", error)
-        }
-      }
-      fetchUserData()
-    }
-  }, [isAuthenticated])
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -77,15 +62,11 @@ const AppHeader = () => {
   }
 
   const handleLoginSuccess = () => {
-    setIsAuthenticated(true)
     setShowLoginModal(false)
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("token")
-    localStorage.removeItem("refresh_token")
-    setIsAuthenticated(false)
-    setUserData(null)
+    logout(); // Use the logout function from auth context
     setShowUserMenu(false)
   }
 
@@ -134,14 +115,14 @@ const AppHeader = () => {
         </div>
 
         <div className="header-right">
-          {isAuthenticated ? (
+          {user ? (
             <div className="user-menu-container" ref={userMenuRef}>
               <button className="user-menu-button" onClick={toggleUserMenu}>
                 <div className="user-avatar">
-                  {userData?.images?.[0]?.url ? (
+                  {user?.profile_picture ? (
                     <img 
-                      src={userData.images[0].url} 
-                      alt={userData.display_name} 
+                      src={user.profile_picture} 
+                      alt={user.user.username} 
                       className="user-avatar-image"
                     />
                   ) : (
@@ -150,7 +131,7 @@ const AppHeader = () => {
                     </svg>
                   )}
                 </div>
-                <span className="user-name">{userData?.display_name || "User"}</span>
+                <span className="user-name">{user?.user.username || "User"}</span>
                 <svg viewBox="0 0 16 16" className="dropdown-icon">
                   <path d="M14 6l-6 6-6-6h12z"></path>
                 </svg>
@@ -160,10 +141,10 @@ const AppHeader = () => {
                 <div className="user-menu-dropdown">
                   <div className="dropdown-header">
                     <div className="dropdown-avatar">
-                      {userData?.images?.[0]?.url ? (
+                      {user?.images?.[0]?.url ? (
                         <img 
-                          src={userData.images[0].url} 
-                          alt={userData.display_name} 
+                          src={user.profile_picture} 
+                          alt={user.user.username} 
                           className="dropdown-avatar-image"
                         />
                       ) : (
@@ -173,8 +154,8 @@ const AppHeader = () => {
                       )}
                     </div>
                     <div className="dropdown-user-info">
-                      <div className="dropdown-user-name">{userData?.display_name || "User"}</div>
-                      <div className="dropdown-user-email">{userData?.email || ""}</div>
+                      <div className="dropdown-user-name">{user?.user.username || "User"}</div>
+                      <div className="dropdown-user-email">{user?.user.email || ""}</div>
                     </div>
                   </div>
                   <div className="dropdown-divider"></div>

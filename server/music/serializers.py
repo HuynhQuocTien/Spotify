@@ -117,7 +117,7 @@ class SongSerializer(DynamicFieldsModelSerializer):
     class Meta:
         model = Song
         fields = ['id', 'title', 'album', 'artists', 'duration',
-                  'duration_str', 'audio_file', 'plays', 'created_at', 'is_favorite', 'image' ,'download_url']
+                  'duration_str', 'audio_file', 'plays', 'created_at', 'is_favorite', 'image' ,'download_url','lyrics']
         read_only_fields = ['id', 'plays', 'created_at', 'is_favorite']
         extra_kwargs = {
             'audio_file': {

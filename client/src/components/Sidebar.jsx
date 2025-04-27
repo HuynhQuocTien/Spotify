@@ -1,14 +1,26 @@
 "use client"
 
 import { useState } from "react"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import "./Sidebar.css"
+import { useAuth } from "../contexts/AuthContext"
 
 const Sidebar = () => {
+  const { user, showLogin,loading } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   const [playlists, setPlaylists] = useState([])
 
   const isActive = (path) => location.pathname === path
+  const handleProtectedRoute = (path) => {
+    if (loading) return null;
+    if(!user) {
+      showLogin()
+      return
+    } else{
+      navigate(path)
+    }
+  }
 
   return (
     <div className="sidebar">
@@ -52,19 +64,18 @@ const Sidebar = () => {
         </ul>
 
         <div className="sidebar-actions">
-          <Link to={"/my-albums"}>
-            <button className="create-playlist-btn">
+            <button className="create-playlist-btn"
+              onClick={(e) => handleProtectedRoute("/my-albums")}>
               <div className="create-playlist-icon">
                 <svg viewBox="0 0 16 16" className="plus-icon">
                   <path d="M15.25 8a.75.75 0 0 1-.75.75H8.75v5.75a.75.75 0 0 1-1.5 0V8.75H1.5a.75.75 0 0 1 0-1.5h5.75V1.5a.75.75 0 0 1 1.5 0v5.75h5.75a.75.75 0 0 1 .75.75z"></path>
                 </svg>
               </div>
               <span>My Albums</span>
-            </button>
-          </Link>
-          <Link to={"/favorites"}>
-          
-          <button className="liked-songs-btn">
+            </button>          
+          <button className="liked-songs-btn"
+            onClick={(e) => handleProtectedRoute("/favorites")}
+          >
             <div className="liked-songs-icon">
               <svg viewBox="0 0 16 16" className="heart-icon">
                 <path d="M15.724 4.22A4.313 4.313 0 0 0 12.192.814a4.269 4.269 0 0 0-3.622 1.13.837.837 0 0 1-1.14 0 4.272 4.272 0 0 0-6.21 5.855l5.916 7.05a1.128 1.128 0 0 0 1.727 0l5.916-7.05a4.228 4.228 0 0 0 .945-3.577z"></path>
@@ -72,7 +83,6 @@ const Sidebar = () => {
             </div>
             <span>Favorites</span>
           </button>
-          </Link>
         </div>
       </nav>
 

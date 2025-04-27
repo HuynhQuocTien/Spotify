@@ -4,8 +4,11 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import "./LoginPage.css"
 import api from "../services/api" // Import API service
+import { useAuth } from "../contexts/AuthContext"
+
 
 const LoginPage = ({ onClose }) => {
+  const { login } = useAuth()
   const [view, setView] = useState('login'); // 'login' | 'signup' | 'forgot' | 'otp' | 'reset'
   const [formData, setFormData] = useState({
     username: '',
@@ -65,60 +68,36 @@ const LoginPage = ({ onClose }) => {
     }
   };
   const handleLogin = async (e) => {
-    e.preventDefault(); // Ngăn reload form mặc định
-    setLoading(true);
-    setError('');
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    
     try {
-      const response = await api.login({
-        username: formData.username,
-        password: formData.password,
-      });
-  
-      console.log('Login response:', response);
-      // // Tính toán thời gian hết hạn 12 giờ từ hiện tại
-      // const expirationTime = new Date();
-      // expirationTime.setHours(expirationTime.getHours() + 12); // Thêm 12 giờ vào thời gian hiện tại
-        
-      // // Lưu token vào cookie, hết hạn trong 12 giờ
-      // Cookies.set('token', response.access, { expires: expirationTime, path: '' });
-      // Cookies.set('refresh_token', response.refresh, { expires: expirationTime, path: '' });
-      // Nếu response trả về thành công
-      localStorage.setItem('token', response.access);
-      localStorage.setItem('refresh_token', response.refresh);
-  
-      navigate('/'); // Chuyển hướng về trang chính
-      window.location.reload();
+      await login(formData.username, formData.password)
+      onClose()
     } catch (err) {
-      // Nếu là lỗi từ server (401, 400,...)
-      if (err.response && err.response.data && err.response.data.detail) {
-        setError(err.response.data.detail); // Hiển thị thông báo từ backend
-      } else {
-        setError('Có lỗi xảy ra. Vui lòng thử lại.');
-      }
+      setError(err.message || 'Đăng nhập thất bại')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
-  
+  }
 
   const handleSignup = async () => {
-    setLoading(true);
-    setError('');
+    setLoading(true)
+    setError('')
     try {
-      // Gọi API đăng ký
-      const response = await api.signup({ email: formData.email, username: formData.username, password: formData.password });
-      if (response.status === 201) {
-        // Chuyển hướng về trang xác thực OTP
-        setView('otp');
-      } else {
-        setError('Có lỗi xảy ra. Vui lòng thử lại.');
-      }
+      await api.register({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
+      })
+      setView('otp')
     } catch (err) {
-      setError('Có lỗi xảy ra. Vui lòng thử lại.');
+      setError(err.response?.data?.detail || 'Đăng ký thất bại')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
   const handleForgotPassword = async () => {
     setLoading(true);
     setError('');

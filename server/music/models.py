@@ -77,6 +77,7 @@ class Song(models.Model):
     song_number = models.PositiveIntegerField()
     plays = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+    lyrics = models.TextField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

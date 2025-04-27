@@ -4,6 +4,8 @@ import { useMusicPlayer } from '../contexts/MusicPlayerContext';
 import HeartFilledIcon from '../components/HeartFilledIcon';
 import HeartOutlineIcon from '../components/HeartOutlineIcon';
 import api from '../services/api';
+import JSZip from "jszip"
+import { saveAs } from "file-saver"
 
 const ArtistPage = () => {
   const { id } = useParams();
@@ -16,7 +18,8 @@ const ArtistPage = () => {
   const [showAlbumModal, setShowAlbumModal] = useState(false);
   const [selectedSong, setSelectedSong] = useState(null);
   const [cssLoaded, setCssLoaded] = useState(false);
-
+  const [downloadingAll, setDownloadingAll] = useState(false);
+  const [downloadingSongId, setDownloadingSongId] = useState(null);
   const audioRef = useRef(null);
   const FAVORITE_TYPE = {
     SONG: 'song',
@@ -30,7 +33,7 @@ const ArtistPage = () => {
       try {
         setLoading(true);
         const response = await api.getUserProfile();
-        const [artistRes, albumsRes, songsRes,albumUserRes] = await Promise.all([
+        const [artistRes, albumsRes, songsRes, albumUserRes] = await Promise.all([
           api.getArtist(id),
           api.getArtistAlbums(id),
           api.getArtistTopSongs(id),
@@ -165,6 +168,79 @@ const ArtistPage = () => {
     }
   };
 
+  const downloadSong = async (e, song) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (!song.audio_file) return;
+
+    setDownloadingSongId(song.id);
+
+    try {
+      const response = await fetch(song.audio_file);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${song.title}.${song.audio_file.split('.').pop().split('?')[0]}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Download failed:', error);
+      alert('Failed to download song. Please try again.');
+    } finally {
+      setDownloadingSongId(null);
+    }
+  };
+
+  const downloadAllSongs = async () => {
+    if (!topSongs.length || downloadingAll) return;
+
+    setDownloadingAll(true);
+    try {
+      const zip = new JSZip();
+      const folder = zip.folder(`${artist.name} - Top Songs`);
+
+      // Thêm ảnh nghệ sĩ vào zip nếu có
+      if (artist.image) {
+        try {
+          const imageResponse = await fetch(artist.image);
+          const imageBlob = await imageResponse.blob();
+          folder.file(`cover.jpg`, imageBlob);
+        } catch (error) {
+          console.error("Error downloading artist image:", error);
+        }
+      }
+
+      // Thêm tất cả bài hát vào zip
+      for (let i = 0; i < topSongs.length; i++) {
+        const song = topSongs[i];
+        if (song.audio_file) {
+          try {
+            const response = await fetch(song.audio_file);
+            const blob = await response.blob();
+            const extension = song.audio_file.split('.').pop().split('?')[0];
+            const fileName = `${i + 1}. ${song.title}.${extension}`;
+            folder.file(fileName, blob);
+          } catch (error) {
+            console.error(`Error downloading song ${song.title}:`, error);
+          }
+        }
+      }
+
+      // Tạo file zip và tải xuống
+      const content = await zip.generateAsync({ type: "blob" });
+      saveAs(content, `${artist.name} - Top Songs.zip`);
+    } catch (error) {
+      console.error("Error creating zip file:", error);
+      alert('Failed to download all songs. Please try again.');
+    } finally {
+      setDownloadingAll(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="artist-loading">
@@ -183,64 +259,8 @@ const ArtistPage = () => {
   }
 
   return (
-    
+
     <div className="artist-page">
-      {showAlbumModal && (
-        <div className="modal-overlay" onClick={() => setShowAlbumModal(false)}>
-          <div className="album-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3 className="modal-title">Add to Album</h3>
-              <button
-                className="modal-close-btn"
-                onClick={() => setShowAlbumModal(false)}
-              >
-                &times;
-              </button>
-            </div>
-            <div className="album-list">
-              {albumsUser.map(album => (
-                <div
-                  key={album.id}
-                  className="album-item"
-                  onClick={async () => {
-                    try {
-                      await api.addSongToAlbum(album.id, selectedSong.id);
-                      console.log(album);
-                      setShowAlbumModal(false);
-                      // Hiển thị thông báo thành công
-                    } catch (error) {
-                      console.error("Error adding song to album:", error);
-                    }
-                  }}
-                >
-                  <div className="album-cover-small">
-                    {album.cover_image ? (
-                      <img src={album.cover_image} alt={album.title} />
-                    ) : (
-                      <div className="default-cover">
-                        <span>{album.title.charAt(0)}</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="album-info-small">
-                    <div className="album-name-small">{album.title}</div>
-                    <div className="album-songs-small">{album.songs_count || 0} songs</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <button
-              className="create-album-btn"
-              onClick={() => {
-                setShowAlbumModal(false);
-                // Chuyển hướng hoặc mở modal tạo album mới
-              }}
-            >
-              Create New Album
-            </button>
-          </div>
-        </div>
-      )}
       <div
         className="artist-header"
         style={{
@@ -256,7 +276,7 @@ const ArtistPage = () => {
               Verified Artist
             </div>
             <h1 className="artist-name">{artist.name}</h1>
-            <div className="artist-followers">1</div>
+            <div className="artist-followers">1 M Followers</div>
           </div>
         </div>
       </div>
@@ -266,6 +286,24 @@ const ArtistPage = () => {
           <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor" /></svg>
         </button>
         <button className="follow-button">Follow</button>
+        {topSongs.length > 0 && (
+          <button 
+            className="download-all-button"
+            onClick={downloadAllSongs}
+            disabled={downloadingAll}
+          >
+            {downloadingAll ? (
+              'Downloading...'
+            ) : (
+              <>
+                <svg viewBox="0 0 24 24" fill="none" className="download-icon">
+                  <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" fill="currentColor" />
+                </svg>
+                Download All
+              </>
+            )}
+          </button>
+        )}
         <button className="more-button">
           <svg viewBox="0 0 16 16">
             <path d="M3 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm6.5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM16 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"></path>
@@ -312,15 +350,28 @@ const ArtistPage = () => {
                   {song.album.name}
                 </Link>
               </div>
-              
+
               <div className="song-actions">
+              <button
+                  className="download-btn"
+                  onClick={(e) => downloadSong(e, song)}
+                  disabled={downloadingSongId === song.id}
+                >
+                  {downloadingSongId === song.id ? (
+                    'Downloading...'
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" fill="currentColor" />
+                    </svg>
+                  )}
+                </button>
                 <button
                   className="add-to-album-btn"
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedSong(song);
                     setShowAlbumModal(true);
-                    console.log(albumsUser); 
+                    console.log(albumsUser);
                   }}
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16">

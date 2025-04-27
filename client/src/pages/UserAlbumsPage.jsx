@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import api from "../services/api"
+import { useAuth } from "../contexts/AuthContext"
 
 const UserAlbumsPage = () => {
   const [albums, setAlbums] = useState([])
@@ -100,7 +101,7 @@ const UserAlbumsPage = () => {
               </div>
               <div className="album-info">
                 <h3 className="album-title">{album.title}</h3>
-                <p className="album-song-count">{album.songs_count || 0} songs</p>
+                <p className="album-song-count">{album.songs.length || 0} songs</p>
               </div>
             </Link>
             <button

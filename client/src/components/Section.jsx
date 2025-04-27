@@ -3,24 +3,31 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { useMusicPlayer } from "../contexts/MusicPlayerContext"
+import { useAuth } from "../contexts/AuthContext" // Giả sử bạn có AuthContext
 import "./Section.css"
 import api, { getMediaUrl } from "../services/api"
-
 
 const Section = ({
   title,
   items = [],
   seeAllLink,
-  type = "grid", // 'grid' | 'list' | 'carousel' | 'songlist'
+  type = "grid",
   limit = 6,
   showPlayButton = true
 }) => {
   const { playSong, currentSong, isPlaying, togglePlay } = useMusicPlayer()
+  const { user, showLogin } = useAuth()
   const [hoveredItem, setHoveredItem] = useState(null)
   const [expandedAlbum, setExpandedAlbum] = useState(null)
   const handlePlayClick = async (e, item) => {
     e.preventDefault()
     e.stopPropagation()
+
+    if (!user) {
+      showLogin()
+      return
+    }
+
 
     try {
       let songs = []
@@ -38,9 +45,9 @@ const Section = ({
             artists: item.artists || [],
             album: { name: 'Video', image: item.image },
             duration: item.duration || item.duration_ms || 0,
-            audio: item.video, // Dùng `audio` làm key chung cho audio/video
+            audio: item.video,
             image: item.image,
-            isVideo: true // (Tuỳ chọn) flag để frontend biết đây là video
+            isVideo: true
           })
           break
         case 'song':
@@ -193,8 +200,8 @@ const Section = ({
                         className="play-song-button"
                         onClick={(e) => handlePlayClick(e, song)}
                       >
-                        <svg viewBox="0 0 24 24">
-                          <path d="M8 5v14l11-7z" />
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                          <path d={isCurrentSongPlaying(item) ? "M6 19h4V5H6v14zm8-14v14h4V5h-4z" : "M8 5v14l11-7z"} />
                         </svg>
                       </button>
                     </div>
@@ -238,13 +245,13 @@ const Section = ({
                     onClick={(e) => handlePlayClick(e, item)}
                     aria-label={`Play ${item.name}`}
                   >
-                    <svg viewBox="0 0 24 24">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                       <path d={isCurrentSongPlaying(item) ? "M6 19h4V5H6v14zm8-14v14h4V5h-4z" : "M8 5v14l11-7z"} />
                     </svg>
                   </button>
                 )}
 
-              
+
               </div>
 
               <div className="item-info">

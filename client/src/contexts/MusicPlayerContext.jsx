@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, createContext, useContext } from "react"
 import api from "../services/api"
+import { useAuth } from "./AuthContext" 
 
 const MusicPlayerContext = createContext()
 
@@ -15,6 +16,7 @@ export const useMusicPlayer = () => {
 
 export const MusicPlayerProvider = ({ children }) => {
   // Player state
+  const { user, showLogin } = useAuth() 
   const [currentSong, setCurrentSong] = useState(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [volume, setVolume] = useState(0.7)
@@ -26,14 +28,11 @@ export const MusicPlayerProvider = ({ children }) => {
   const [error, setError] = useState(null)
   const [currentIndex, setCurrentIndex] = useState(-1)
   const [favorites, setFavorites] = useState([])
-
-  // Queue management
   const [queue, setQueue] = useState([])
   const [history, setHistory] = useState([])
-
-  // Playback modes
   const [shuffle, setShuffle] = useState(false)
   const [repeat, setRepeat] = useState("off") // 'off', 'all', 'one'
+
 
   // Audio element reference
   const audioRef = useRef(null)
@@ -41,28 +40,49 @@ export const MusicPlayerProvider = ({ children }) => {
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
+        if (!user) return // Không fetch nếu chưa đăng nhập
+        
         const response = await api.getFavoriteSongs()
         setFavorites(response.data || [])
       } catch (error) {
         console.error("Error fetching favorites:", error)
+        if (error.response?.status === 401) {
+          // Xử lý khi token hết hạn
+          localStorage.removeItem('token')
+          localStorage.removeItem('refresh_token')
+        }
       }
     }
-    fetchFavorites()
-  }, [])
+    
+    if (user) {
+      fetchFavorites()
+    } else {
+      setFavorites([]) // Reset favorites khi đăng xuất
+    }
+  }, [user])
+  
   const toggleFavorite = async (songId) => {
+    if (!user) {
+      showLogin()
+      return
+    }
+
     try {
       if (favorites.some(song => song.id === songId)) {
         await api.removeFavoriteSong(songId)
         setFavorites(favorites.filter(song => song.id !== songId))
       } else {
-        // Cần thêm logic lấy thông tin bài hát nếu cần
         await api.addFavoriteSong(songId)
-        // Giả sử bạn có hàm getSongDetail
-        const songDetail = await api.getSongDetail(songId)
+        const songDetail = await api.getSong(songId)
         setFavorites([...favorites, songDetail.data])
       }
     } catch (error) {
       console.error("Error toggling favorite:", error)
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token')
+        localStorage.removeItem('refresh_token')
+        showLogin()
+      }
     }
   }
   useEffect(() => {
@@ -123,50 +143,48 @@ export const MusicPlayerProvider = ({ children }) => {
   }
   // Player controls
   const playSong = useCallback(async (song, songs = []) => {
+    if (!user) {
+      showLogin() // Hiển thị modal đăng nhập nếu chưa đăng nhập
+      return
+    }
     try {
-      setIsLoading(true);
-      setError(null);
-  
-      // Dừng và reset audio hiện tại
+      setIsLoading(true)
+      setError(null)
+
       if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
+        audioRef.current.pause()
+        audioRef.current.src = ""
       }
-  
-      // Tạo audio element mới
-      const audio = new Audio();
-      audioRef.current = audio;
+
+      const audio = new Audio()
+      audioRef.current = audio
       
-      // Reset thời gian
-      setCurrentTime(0);
-      setProgress(0);
-  
-      // Thiết lập source và sự kiện
-      audio.src = song.audio;
-      audio.volume = isMuted ? 0 : volume;
-      audio.load();
-  
-      // Phát nhạc
-      await audio.play();
+      setCurrentTime(0)
+      setProgress(0)
+
+      audio.src = song.audio
+      audio.volume = isMuted ? 0 : volume
+      audio.load()
+
+      await audio.play()
       
-      // Cập nhật state
       setCurrentSong({
         ...song,
         contextSongs: songs,
         contextUri: song.contextUri || `player:${song.id}`
-      });
-      setQueue(songs.slice(songs.findIndex(t => t.id === song.id) + 1));
-      setHistory(prev => [currentSong, ...prev].slice(0, 50));
-      setIsPlaying(true);
-  
+      })
+      setQueue(songs.slice(songs.findIndex(t => t.id === song.id) + 1))
+      setHistory(prev => [currentSong, ...prev].slice(0, 50))
+      setIsPlaying(true)
+
     } catch (err) {
-      console.error("Play error:", err);
-      setError(err.message);
-      setIsPlaying(false);
+      console.error("Play error:", err)
+      setError(err.message)
+      setIsPlaying(false)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, [currentSong, isMuted, volume]);
+  }, [currentSong, isMuted, volume, user, showLogin])
   useEffect(() => {
     return () => {
       // Dọn dẹp khi component unmount

@@ -8,6 +8,7 @@ const FavoritesPage = () => {
   const [favorites, setFavorites] = useState({ songs: [], albums: [] });
   const [loading, setLoading] = useState(true);
   const { playSong, currentSong, isPlaying } = useMusicPlayer();
+  const [cssLoaded, setCssLoaded] = useState(false);
 
   useEffect(() => {
     import("./FavoritesPage.css").then(() => {

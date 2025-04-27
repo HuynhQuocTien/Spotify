@@ -1,74 +1,83 @@
-"use client"
-
+// contexts/AuthContext.js
 import { createContext, useContext, useState, useEffect } from "react"
-import { auth } from "../services/firebase"
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-  updateProfile,
-} from "firebase/auth"
+import api from "../services/api"
+import LoginPage from "../pages/LoginPage"
 
 const AuthContext = createContext()
 
 export const useAuth = () => {
-  return useContext(AuthContext)
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider")
+  }
+  return context
 }
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
-
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const showLogin = () => setShowLoginModal(true)
+  const hideLogin = () => setShowLoginModal(false)
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user)
+    const checkAuth = async () => {
+      const token = localStorage.getItem('token')
+      if (token) {
+        try {
+          const userProfile = await api.getUserProfile()
+          setUser(userProfile.data)
+        } catch (error) {
+          console.error("Auth check failed:", error)
+          logout()
+        }
+      }
       setLoading(false)
-    })
-
-    return unsubscribe
+    }
+    
+    checkAuth()
   }, [])
 
-  const signup = async (email, password, displayName) => {
+  const login = async (username, password) => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-
-      // Update profile with display name
-      if (displayName) {
-        await updateProfile(userCredential.user, { displayName })
-      }
-
-      return userCredential.user
+      const response = await api.login({ username, password })
+      localStorage.setItem('token', response.access)
+      localStorage.setItem('refresh_token', response.refresh)
+      
+      const userProfile = await api.getUserProfile()
+      setUser(userProfile.data)
+      return true
     } catch (error) {
       throw error
     }
   }
 
-  const login = async (email, password) => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password)
-      return userCredential.user
-    } catch (error) {
-      throw error
-    }
-  }
-
-  const signOut = async () => {
-    try {
-      await firebaseSignOut(auth)
-    } catch (error) {
-      throw error
-    }
+  const logout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('refresh_token')
+    setUser(null)
   }
 
   const value = {
     user,
-    signup,
     login,
-    signOut,
+    logout,
     loading,
+    showLoginModal,
+    showLogin,
+    hideLogin,
   }
 
-  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      logout,
+      loading, 
+      showLogin,
+      hideLogin 
+    }}>
+      {children}
+      {showLoginModal && <LoginPage onClose={hideLogin} />}
+    </AuthContext.Provider>
+  )
 }
-

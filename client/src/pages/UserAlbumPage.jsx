@@ -18,12 +18,11 @@ const UserAlbumPage = () => {
     })
     const fetchAlbumData = async () => {
       try {
-        const [albumRes, songsRes] = await Promise.all([
-          api.getUserAlbum(id),
-          api.getAlbumSongs(id) // Giả sử API tương tự
+        const [response] = await Promise.all([
+          api.getSongsUserAlbums(id)
         ])
-        setAlbum(albumRes.data)
-        setSongs(songsRes.data.songs || [])
+        setAlbum(response.data)
+        setSongs(response.data.songs || [])
       } catch (error) {
         console.error("Error fetching album data:", error)
       } finally {
@@ -104,10 +103,8 @@ const UserAlbumPage = () => {
             <div key={song.id} className="song-item">
               <div className="song-number">
                 <span>{index + 1}</span>
-                <button className="play-btn" onClick={() => handlePlaySong(song, index)}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path d="M8 5V19L19 12L8 5Z" fill="white" />
-                  </svg>
+                <button className="play-btn play-btn-a" onClick={() => handlePlaySong(song, index)}>
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor" /></svg>
                 </button>
               </div>
               <div className="song-info">

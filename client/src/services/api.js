@@ -216,32 +216,38 @@ axios.interceptors.request.use(config => {
 // Response Interceptor
 axios.interceptors.response.use(
   response => {
-    activeRequests--;
-    return response;
+    activeRequests--
+    return response
   },
   async error => {
-    activeRequests--;
-    const originalRequest = error.config;
+    activeRequests--
+    const originalRequest = error.config
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+      originalRequest._retry = true
+      
       try {
-        const refresh = localStorage.getItem('refresh_token');
-        if (!refresh) throw new Error('No refresh token');
-        const { data } = await api.refreshToken(refresh);
-        localStorage.setItem('token', data.access);
-        originalRequest.headers.Authorization = `Bearer ${data.access}`;
-        return axios(originalRequest);
+        const refresh = localStorage.getItem('refresh_token')
+        if (!refresh) {
+          // Xử lý khi không có refresh token
+          localStorage.removeItem('token')
+          throw new Error('Session expired. Please login again.')
+        }
+        
+        const { data } = await api.refreshToken(refresh)
+        localStorage.setItem('token', data.access)
+        originalRequest.headers.Authorization = `Bearer ${data.access}`
+        return axios(originalRequest)
       } catch (refreshError) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refresh_token');
-        return Promise.reject(refreshError);
+        localStorage.removeItem('token')
+        localStorage.removeItem('refresh_token')
+        throw refreshError
       }
     }
 
-    return Promise.reject(error);
+    return Promise.reject(error)
   }
-);
+)
 
 const api = {
   // Auth
@@ -288,7 +294,6 @@ const api = {
   getAlbums: () => axios.get(`${API_BASE_URL}/albums/`),
   getAlbum: (id) => axios.get(`${API_BASE_URL}/albums/${id}/`),
   getAlbumSongs: (id) => axios.get(`${API_BASE_URL}/albums/${id}/songs/`),
-  getAlbumSongs: (id) => axios.get(`${API_BASE_URL}/albums/${id}/songs/`),
   getAlbumByArtist: (id) => axios.get(`${API_BASE_URL}/albums/artist/${id}/`),
   getNewReleases: () => axios.get(`${API_BASE_URL}/albums/new_releases/`),
   getAlbumCoverUrl: (path) => getMediaUrl(`/albums/${path}`),
@@ -318,14 +323,35 @@ const api = {
   removeFavoriteSong: (songId) => axios.post(`${API_BASE_URL}/profile/remove_favorite_song/`, { song_id: songId }),
 
   // User Albums
-  createUserAlbum: (data) => axios.post(`${API_BASE_URL}/user-albums/`, data),
   getUserAlbums: () => axios.get(`${API_BASE_URL}/user-albums/`),
-  getUserAlbum: (id) => axios.get(`${API_BASE_URL}/user-albums/${id}/`),
-  updateUserAlbum: (id, data) => axios.put(`${API_BASE_URL}/user-albums/${id}/`, data),
-  deleteUserAlbum: (id) => axios.delete(`${API_BASE_URL}/user-albums/${id}/`),
-  addSongToUserAlbum: (albumId, songId) => axios.post(`${API_BASE_URL}/user-albums/${albumId}/songs/`, { song_id: songId }),
-  removeSongFromUserAlbum: (albumId, songId) => axios.delete(`${API_BASE_URL}/user-albums/${albumId}/songs/${songId}/`),
+    
+  createUserAlbum: (data) =>
+    axios.post(`${API_BASE_URL}/user-albums/`, data),
 
+  getSongsUserAlbums: (id) =>
+    axios.get(`${API_BASE_URL}/user-albums/${id}/get_songs/`),
+
+  getUserAlbum: (id) =>
+    axios.get(`${API_BASE_URL}/user-albums/${id}/`),
+
+  updateUserAlbum: (id, data) =>
+    axios.put(`${API_BASE_URL}/user-albums/${id}/`, data),
+
+  deleteUserAlbum: (id) =>
+    axios.delete(`${API_BASE_URL}/user-albums/${id}/`),
+
+  addSongToUserAlbum: (albumId, songId) =>
+    axios.post(`${API_BASE_URL}/user-albums/${albumId}/add_song/`, {
+      song_id: songId,
+    }),
+
+  removeSongFromUserAlbum: (albumId, songId) =>
+    axios.delete(
+      `${API_BASE_URL}/user-albums/${albumId}/remove_song/`,
+      {
+        params: { song_id: songId },
+      }
+    ),
   // Favorites
   getFavoriteSongs: () => axios.get(`${API_BASE_URL}/favorites/`),
   addFavoriteSong: (songId,type) => axios.post(`${API_BASE_URL}/favorites/`, { id: songId,type: type }),

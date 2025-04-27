@@ -1,20 +1,25 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useState, useEffect, use } from "react"
+import { useParams, useNavigate, Link } from "react-router-dom"
 import { useMusicPlayer } from "../contexts/MusicPlayerContext"
 import "./SongPage.css"
 import api from "../services/api"
+import HeartFilledIcon from '../components/HeartFilledIcon';
+import HeartOutlineIcon from '../components/HeartOutlineIcon';
+
 
 const SongPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const [song, setSong] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [relatedSongs, setRelatedSongs] = useState([])
-  const { playSong, currentSong, isPlaying, togglePlay } = useMusicPlayer()
-  
+  const { playSong, currentSong, isPlaying, togglePlay,updateFavorites } = useMusicPlayer()
 
+  const FAVORITE_TYPE = {
+    SONG: 'song',
+    ALBUM: 'album'
+  };
   useEffect(() => {
     const fetchSongData = async () => {
       try {
@@ -23,12 +28,12 @@ const SongPage = () => {
         // Fetch song details
         const songRes = await api.getSong(id)
         setSong(songRes.data)
-        
-        // Fetch related songs (could be from same album or artist)
-        const relatedRes = await api.getRelatedSongs(id)
-        setRelatedSongs(relatedRes.data.songs.slice(0, 5))
-        
         setLoading(false)
+        try {
+          const favRes = await api.checkFavoriteStatus(id,'song')
+        } catch (err) {
+          console.error("Error checking favorite status:", err)
+        }
       } catch (error) {
         console.error("Error fetching song data:", error)
         setLoading(false)
@@ -38,6 +43,33 @@ const SongPage = () => {
     fetchSongData()
   }, [id])
 
+    // Thêm vào hàm handleToggleFavorite
+  const handleToggleFavorite = async (e, songId, isCurrentlyFavorite) => {
+    e.stopPropagation();
+    const newState = !isCurrentlyFavorite;
+
+    // Optimistic UI update
+    setSong({ ...song, is_favorite: newState });
+
+    // Update localStorage
+    localStorage.setItem(`favorite_${FAVORITE_TYPE.SONG}_${songId}`, JSON.stringify(newState));
+
+    try {
+      // Gọi API để đồng bộ với server
+      await api.addFavoriteSong(songId, FAVORITE_TYPE.SONG);
+
+      // Cập nhật context nếu cần
+      updateFavorites && updateFavorites(songId, FAVORITE_TYPE.SONG, newState ? 'add' : 'remove');
+    } catch (err) {
+      // Rollback nếu có lỗi
+      setSong({ ...song, is_favorite: isCurrentlyFavorite });
+
+      localStorage.setItem(`favorite_${FAVORITE_TYPE.SONG}_${songId}`, JSON.stringify(isCurrentlyFavorite));
+
+      console.error('Toggle favorite failed:', err);
+      alert('Failed to update favorite. Please try again.');
+    }
+  };
   const handlePlayClick = () => {
     if (currentSong?.id === song.id) {
       togglePlay()
@@ -46,9 +78,17 @@ const SongPage = () => {
         id: song.id,
         name: song.name,
         artists: song.artists || [],
-        album: song.album || { name: '', image: '' },
+        album: song.album || { 
+          title: "",
+          artist: {
+            name: "",
+            image: ""
+        },
+        cover_image: "",
+        release_date: "" 
+      },
         duration: song.duration || 0,
-        audio: song.audio || song.preview_url,
+        audio: song.audio_file || song.preview_url,
         image: song.image || song.album?.image || song.album?.cover_image
       })
     }
@@ -58,7 +98,9 @@ const SongPage = () => {
     const minutes = Math.floor(ms / 60000)
     const seconds = Math.floor((ms % 60000) / 1000)
     return `${minutes}:${seconds.toString().padStart(2, "0")}`
-  }
+  }  
+  
+
 
   if (loading) {
     return (
@@ -79,20 +121,20 @@ const SongPage = () => {
   }
 
   return (
-    <div className="song-page">
-      <div className="song-header">
-        <div className="song-cover">
+    <div className="song-page-s">
+      <div className="song-header-s">
+        <div className="song-cover-s">
           <img 
-            src={song.image || song.album?.image || "/placeholder.svg"} 
-            alt={song.name} 
-            className="song-image" 
+            src={song.image || song.album?.cover_image || "/placeholder.svg"} 
+            alt={song.title} 
+            className="song-image-s" 
           />
         </div>
         
-        <div className="song-info">
-          <h1 className="song-title">{song.name}</h1>
+        <div className="song-info-s">
+          <h1 className="song-title-s">{song.title}</h1>
           
-          <div className="song-artists">
+          <div className="song-artists-s">
             {song.artists.map((artist, index) => (
               <span key={artist.id}>
                 <Link to={`/artist/${artist.id}`} className="artist-link">
@@ -103,42 +145,54 @@ const SongPage = () => {
             ))}
           </div>
           
-          <div className="song-album">
-            From the album: <Link to={`/album/${song.album?.id}`}>{song.album?.name}</Link>
+          <div className="song-album-s">
+            From the album: <Link to={`/album/${song.album?.id}`}>{song.album?.title}</Link>
           </div>
           
-          <div className="song-meta">
-            <span>{formatDuration(song.duration)}</span>
-            <span>•</span>
-            <span>{song.popularity}% popularity</span>
+          <div className="song-meta-s">
+            <span>{song.duration}</span>
+            {/* <span>•</span>
+            <span>{song.popularity}% popularity</span> */}
           </div>
           
           <div className="song-actions">
             <button 
-              className={`play-button ${currentSong?.id === song.id && isPlaying ? 'playing' : ''}`}
+              className={`play-button-s ${currentSong?.id === song.id && isPlaying ? 'playing' : ''}`}
               onClick={handlePlayClick}
             >
               {currentSong?.id === song.id && isPlaying ? 'Pause' : 'Play'}
             </button>
             
-            <button className="add-to-playlist">
+            <button className="add-to-playlist-s">
               Add to Playlist
+            </button>
+            <button 
+              className={`favorite-button-s ${song.is_favorite ? 'favorite-active' : ''}`}
+              onClick={(e) => handleToggleFavorite(e, song.id, song.is_favorite)}
+              aria-label={song.is_favorite ? "Remove from favorites" : "Add to favorites"}
+              title={song.is_favorite ? "Remove from favorites" : "Add to favorites"}
+            >
+              {song.is_favorite ? (
+                    <HeartFilledIcon className="heart-icon" />
+                  ) : (
+                    <HeartOutlineIcon className="heart-icon" />
+                  )}
             </button>
           </div>
         </div>
       </div>
       
-      <div className="song-details">
-        <div className="lyrics-section">
+      <div className="song-details-s">
+        <div className="lyrics-section-s">
           <h3>Lyrics</h3>
           {song.lyrics ? (
-            <pre className="lyrics-text">{song.lyrics}</pre>
+            <pre className="lyrics-text-s">{song.lyrics}</pre>
           ) : (
             <p>No lyrics available for this song.</p>
           )}
         </div>
         
-        {relatedSongs.length > 0 && (
+        {/* {relatedSongs.length > 0 && (
           <div className="related-songs">
             <h3>You might also like</h3>
             <div className="related-songs-list">
@@ -163,7 +217,7 @@ const SongPage = () => {
               ))}
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   )

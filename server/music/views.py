@@ -683,12 +683,12 @@ class UserAlbumViewSet(viewsets.ModelViewSet):
         """Tự động gán user hiện tại khi tạo album"""
         serializer.save(user=self.request.user)
 
-    @action(detail=False, methods=['get'])
-    def my_albums(self, request):
-        """Lấy tất cả albums của user (tương tự list view)"""
-        albums = self.get_queryset()
-        serializer = self.get_serializer(albums, many=True)
-        return Response(serializer.data)
+    # @action(detail=False, methods=['get'])
+    # def my_albums(self, request):
+    #     """Lấy tất cả albums của user (tương tự list view)"""
+    #     albums = self.get_queryset()
+    #     serializer = self.get_serializer(albums, many=True)
+    #     return Response(serializer.data)
 
     @action(detail=True, methods=['post'])
     def add_song(self, request, pk=None):
@@ -741,4 +741,11 @@ class UserAlbumViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+    @action(detail=True, methods=['get'])
+    def get_songs(self, request, pk=None):
+        """Lấy tất cả bài hát của album theo id album"""
+        album = self.get_object()  # Lấy album từ pk
+        songs = album.songs.all()  # Lấy tất cả bài hát trong album
+        album_serializer = UserAlbumSerializer(album)
+        return Response(album_serializer.data)
 
