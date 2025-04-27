@@ -1,15 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect} from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import "./Sidebar.css"
 import { useAuth } from "../contexts/AuthContext"
+import api from "../services/api"
 
 const Sidebar = () => {
   const { user, showLogin,loading } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
-  const [playlists, setPlaylists] = useState([])
+  const [myalbums, setMyAlbums] = useState([])
 
   const isActive = (path) => location.pathname === path
   const handleProtectedRoute = (path) => {
@@ -21,6 +22,19 @@ const Sidebar = () => {
       navigate(path)
     }
   }
+  useEffect(() => {
+    if (!loading && user) {
+      api.getUserAlbums()
+        .then(res => {
+          setMyAlbums(res.data)
+        })
+        .catch(err => {
+          console.error("Failed to fetch user albums", err)
+        })
+    } else {
+      setMyAlbums([]) 
+    }
+  }, [user, loading])
 
   return (
     <div className="sidebar">
@@ -53,14 +67,6 @@ const Sidebar = () => {
               <span>Search</span>
             </Link>
           </li>
-          <li className={isActive("/library") ? "active" : ""}>
-            <Link to="/library">
-              <svg viewBox="0 0 24 24" className="sidebar-icon">
-                <path d="M14.5 2.134a1 1 0 0 1 1 0l6 3.464a1 1 0 0 1 .5.866V21a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1V3a1 1 0 0 1 .5-.866zM16 4.732V20h4V7.041l-4-2.309zM3 22a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H3zm1-2h4V4H4v16z"></path>
-              </svg>
-              <span>Your Library</span>
-            </Link>
-          </li>
         </ul>
 
         <div className="sidebar-actions">
@@ -88,11 +94,11 @@ const Sidebar = () => {
 
       <div className="sidebar-divider"></div>
 
-      <div className="sidebar-playlists">
+      <div className="sidebar-myalbums">
         <ul>
-          {playlists.map((playlist) => (
+          {myalbums.map((playlist) => (
             <li key={playlist.id}>
-              <Link to={`/playlist/${playlist.id}`}>{playlist.name}</Link>
+              <Link to={`/my-album/${playlist.id}`}>{playlist.title}</Link>
             </li>
           ))}
         </ul>

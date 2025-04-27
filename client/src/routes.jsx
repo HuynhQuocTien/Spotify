@@ -1,7 +1,6 @@
 import { Routes, Route } from "react-router-dom"
 import HomePage from "./pages/HomePage"
 import SearchPage from "./pages/SearchPage"
-import LibraryPage from "./pages/LibraryPage"
 import AlbumPage from "./pages/AlbumPage"
 import ArtistPage from "./pages/ArtistPage"
 import LoginPage from "./pages/LoginPage"
@@ -43,15 +42,6 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <SearchPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/library"
-        element={
-          <ProtectedRoute>
-            <LibraryPage />
           </ProtectedRoute>
         }
       />

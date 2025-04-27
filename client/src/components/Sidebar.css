@@ -129,30 +129,30 @@
     margin: 16px 12px;
   }
   
-  .sidebar-playlists {
+  .sidebar-myalbums {
     flex: 1;
     overflow-y: auto;
     padding: 0 12px;
   }
   
-  .sidebar-playlists ul {
+  .sidebar-myalbums ul {
     list-style: none;
     padding: 0;
     margin: 0;
   }
   
-  .sidebar-playlists li {
+  .sidebar-myalbums li {
     padding: 8px 0;
     font-size: 14px;
   }
   
-  .sidebar-playlists a {
+  .sidebar-myalbums a {
     color: #b3b3b3;
     text-decoration: none;
     transition: color 0.2s ease;
   }
   
-  .sidebar-playlists a:hover {
+  .sidebar-myalbums a:hover {
     color: #fff;
   }
   
@@ -197,7 +197,7 @@
   
     .sidebar-nav span,
     .sidebar-actions span,
-    .sidebar-playlists,
+    .sidebar-myalbums,
     .sidebar-divider,
     .sidebar-footer {
       display: none;

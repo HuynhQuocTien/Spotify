@@ -136,19 +136,21 @@ const HomePage = () => {
         />
       )}
 
-      {artists.length > 0 && (
-        <Section
-          title="Popular Artists"
-          items={artists}
-          seeAllLink="/browse/artists"
-        />
-      )}
+      
 
       {albums.length > 0 && (
         <Section
           title="New Albums"
           items={albums}
           seeAllLink="/browse/albums"
+        />
+      )}
+      
+      {artists.length > 0 && (
+        <Section
+          title="Popular Artists"
+          items={artists}
+          seeAllLink="/browse/artists"
         />
       )}
 

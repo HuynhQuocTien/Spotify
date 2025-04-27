@@ -12,7 +12,6 @@ const ArtistPage = () => {
   const [artist, setArtist] = useState(null);
   const [topSongs, setTopSongs] = useState([]);
   const [albums, setAlbums] = useState([]);
-  const [albumsUser, setAlbumsUser] = useState([]);
   const [loading, setLoading] = useState(true);
   const { playSong, currentSong, isPlaying, favorites, updateFavorites } = useMusicPlayer();
   const [showAlbumModal, setShowAlbumModal] = useState(false);
@@ -33,17 +32,15 @@ const ArtistPage = () => {
       try {
         setLoading(true);
         const response = await api.getUserProfile();
-        const [artistRes, albumsRes, songsRes, albumUserRes] = await Promise.all([
+        const [artistRes, albumsRes, songsRes] = await Promise.all([
           api.getArtist(id),
           api.getArtistAlbums(id),
           api.getArtistTopSongs(id),
-          api.getUserAlbums(),
         ]);
 
         setArtist(artistRes.data);
         setAlbums(albumsRes.data.items);
         // console.log(albumUserRes.data);
-        setAlbumsUser(albumUserRes.data);
         // Kiểm tra favorite từ cả API và localStorage
         const songsWithFavorites = await Promise.all(songsRes.data.songs.map(async (song) => {
           // Lấy trạng thái favorite từ server (nếu API hỗ trợ)
@@ -371,7 +368,6 @@ const ArtistPage = () => {
                     e.stopPropagation();
                     setSelectedSong(song);
                     setShowAlbumModal(true);
-                    console.log(albumsUser);
                   }}
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16">

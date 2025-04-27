@@ -1,3 +1,4 @@
+import json
 import os
 import threading
 from datetime import datetime
@@ -5,11 +6,13 @@ from datetime import datetime
 import jwt
 from django.conf import settings
 from django.core.mail import send_mail
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import FileResponse, HttpResponse
 from urllib.parse import quote
 import requests
 from io import BytesIO
+
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import viewsets, status, permissions, generics
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -20,48 +23,234 @@ from .serializers import (
     GenreSerializer, ArtistSerializer, AlbumSerializer,
     SongSerializer, PlaylistSerializer, UserProfileSerializer,
     CustomTokenObtainPairSerializer, ChatHistorySerializer, ForgotPasswordSerializer, VerifyOTPSerializer,
-    ResetPasswordSerializer, VideoSerializer, UserAlbumSerializer
+    ResetPasswordSerializer, VideoSerializer, UserAlbumSerializer, UserSerializer, UserCreateSerializer
 )
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from transformers import pipeline
-import threading
+from dotenv import load_dotenv
+from django.http import JsonResponse
+import google.generativeai as genai
 
-chatbot = None
-
-
-def load_model():
-    global chatbot
-    # chatbot = pipeline("text-generation", model="gpt2")
+load_dotenv()
 
 
-threading.Thread(target=load_model).start()
+class SmartSearchView(APIView):
+    """
+    API view for searching songs, albums, and artists using natural language processing
+    """
 
-
-class ChatAPI(APIView):
-    permission_classes = [IsAuthenticated]
+    def __init__(self):
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        generation_config = {
+            "temperature": 0.7,
+            "top_p": 1,
+            "top_k": 32,
+            "max_output_tokens": 200,
+        }
+        self.model = genai.GenerativeModel(
+            model_name="gemini-2.0-flash",
+            generation_config=generation_config
+        )
 
     def post(self, request):
-        if not chatbot:
-            return Response({"error": "AI model is loading"}, status=503)
+        query = request.data.get('query')
+        if not query:
+            return Response({"error": "Query parameter is required"},
+                            status=status.HTTP_400_BAD_REQUEST)
 
-        message = request.data.get("message")
-        if not message:
-            return Response({"error": "Message is required"}, status=400)
+        try:
+            # Use Gemini AI to analyze the search query
+            search_type, search_params = self.analyze_query(query)
 
-        # Xử lý message với AI
-        response = chatbot(message, max_length=100, do_sample=True)[0]['generated_text']
+            # Perform search based on the analysis
+            if search_type == "song":
+                results = self.search_songs(search_params)
+                serializer = SongSerializer(results, many=True)
+                data = serializer.data
+                for item in data:
+                    item['url'] = f"http://localhost:5173/song/{item['id']}"
 
-        # Lưu lịch sử chat vào database
-        chat = ChatHistory.objects.create(
-            user=request.user,
-            message=message,
-            response=response,
-            read=False
-        )
-        serializer = ChatHistorySerializer(chat)
-        return Response(serializer.data)
+                if not results:
+                    return Response({"message": "Không tìm thấy bài hát nào phù hợp với yêu cầu của bạn."},
+                                    status=status.HTTP_404_NOT_FOUND)
+            elif search_type == "album":
+                results = self.search_albums(search_params)
+                serializer = AlbumSerializer(results, many=True)
+                data = serializer.data
+                # Add URL links to each result
+                for item in data:
+                    item['url'] = f"http://localhost:5173/album/{item['id']}"
+
+                if not results:
+                    return Response({"message": "Không tìm thấy album nào phù hợp với yêu cầu của bạn."},
+                                    status=status.HTTP_404_NOT_FOUND)
+            elif search_type == "artist":
+                results = self.search_artists(search_params)
+                serializer = ArtistSerializer(results, many=True)
+                data = serializer.data
+                for item in data:
+                    item['url'] = f"http://localhost:5173/artist/{item['id']}"
+
+                if not results:
+                    return Response({"message": "Không tìm thấy nghệ sĩ nào phù hợp với yêu cầu của bạn."},
+                                    status=status.HTTP_404_NOT_FOUND)
+            else:
+                # If search type is uncertain, search all categories
+                song_results = self.search_songs({"query": query})
+                album_results = self.search_albums({"query": query})
+                artist_results = self.search_artists({"query": query})
+
+                song_data = SongSerializer(song_results, many=True).data
+                album_data = AlbumSerializer(album_results, many=True).data
+                artist_data = ArtistSerializer(artist_results, many=True).data
+
+                # Add URL links to each result type
+                for item in song_data:
+                    item['url'] = f"http://localhost:5173/song/{item['id']}"
+                for item in album_data:
+                    item['url'] = f"http://localhost:5173/album/{item['id']}"
+                for item in artist_data:
+                    item['url'] = f"http://localhost:5173/artist/{item['id']}"
+
+                if not song_results and not album_results and not artist_results:
+                    return Response({"message": "Không tìm thấy kết quả nào phù hợp với yêu cầu của bạn."},
+                                    status=status.HTTP_404_NOT_FOUND)
+
+                return Response({
+                    "songs": song_data,
+                    "albums": album_data,
+                    "artists": artist_data
+                })
+
+            return Response(data)
+
+        except Exception as e:
+            return Response({"error": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def analyze_query(self, query):
+        """
+        Sử dụng Gemini AI để phân tích truy vấn và trích xuất các tham số tìm kiếm
+        """
+        prompt = f"""Bạn là hệ thống phân tích truy vấn âm nhạc chuyên nghiệp. 
+        Hãy phân tích truy vấn sau và trả về DUY NHẤT một JSON object:
+
+        Truy vấn: "{query}"
+
+        Yêu cầu:
+        1. Xác định loại tìm kiếm (song/album/artist). Nếu không có thì hãy trả về null hoặc không có
+        2. Trích xuất thông tin liên quan
+        3. Trả về JSON theo cấu trúc sau (KHÔNG THÊM bất kỳ nội dung nào khác):
+
+        {{
+            "search_type": "song|album|artist",
+            "parameters": {{
+                "field1": "value1",
+                "field2": "value2"
+            }}
+        }}
+
+        Quy tắc:
+        - search_type: Chỉ được chọn 1 trong 3 giá trị (song, album, artist)
+        - parameters: Chứa các trường phù hợp với từng loại
+        - Nếu không thể xác định được loại tìm kiếm rõ ràng, hãy trả về null cho search_type
+        """
+
+        try:
+            response = self.model.generate_content(prompt)
+            raw_text = response.text
+
+            # Xử lý trường hợp có markdown
+            json_str = raw_text.strip()
+            if json_str.startswith('```json'):
+                json_str = json_str[7:]  # Bỏ qua ```json
+            if json_str.endswith('```'):
+                json_str = json_str[:-3]  # Bỏ qua ```
+
+            # Parse JSON
+            result = json.loads(json_str)
+
+            # Validate kết quả
+            if not isinstance(result, dict):
+                raise ValueError("Kết quả không phải dictionary")
+
+            if "search_type" not in result or "parameters" not in result:
+                raise ValueError("Thiếu trường bắt buộc trong kết quả")
+
+            valid_types = ["song", "album", "artist", None]
+            if result["search_type"] not in valid_types:
+                raise ValueError(f"Loại tìm kiếm không hợp lệ: {result['search_type']}")
+
+            return result["search_type"], result["parameters"]
+
+        except json.JSONDecodeError as e:
+            print(f"Lỗi parse JSON. Nội dung nhận được:\n{raw_text}")
+            raise ValueError(f"Lỗi phân tích phản hồi AI: {str(e)}")
+        except Exception as e:
+            raise ValueError(f"Lỗi khi phân tích truy vấn: {str(e)}")
+
+    def search_songs(self, params):
+        """Search songs based on extracted parameters"""
+        query_obj = Q()
+
+        if "title" in params:
+            query_obj |= Q(name__icontains=params["title"])
+
+        if "lyrics" in params:
+            query_obj |= Q(lyrics__icontains=params["lyrics"])
+
+        if "artist" in params:
+            query_obj |= Q(artist__name__icontains=params["artist"])
+
+        # Generic query parameter
+        if "query" in params:
+            query_obj |= Q(name__icontains=params["query"])
+            query_obj |= Q(lyrics__icontains=params["query"])
+            query_obj |= Q(artist__name__icontains=params["query"])
+
+        return Song.objects.filter(query_obj).distinct()[:10]
+
+    def search_albums(self, params):
+        """Search albums based on extracted parameters"""
+        query_obj = Q()
+
+        if "title" in params:
+            query_obj |= Q(name__icontains=params["title"])
+
+        if "artist" in params:
+            query_obj |= Q(artist__name__icontains=params["artist"])
+
+        if "year" in params:
+            query_obj |= Q(release_date__year=params["year"])
+
+        # Generic query parameter
+        if "query" in params:
+            query_obj |= Q(name__icontains=params["query"])
+            query_obj |= Q(artist__name__icontains=params["query"])
+
+        return Album.objects.filter(query_obj).distinct()[:10]
+
+    def search_artists(self, params):
+        """Search artists based on extracted parameters"""
+        query_obj = Q()
+
+        if "name" in params:
+            query_obj |= Q(name__icontains=params["name"])
+
+        if "genre" in params:
+            query_obj |= Q(genres__name__icontains=params["genre"])
+
+        if "bio" in params:
+            query_obj |= Q(bio__icontains=params["bio"])
+
+        # Generic query parameter
+        if "query" in params:
+            query_obj |= Q(name__icontains=params["query"])
+            query_obj |= Q(bio__icontains=params["query"])
+
+        return Artist.objects.filter(query_obj).distinct()[:10]
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -494,16 +683,21 @@ class ArtistTopSongsView(APIView):
 
 class SearchView(APIView):
     def get(self, request):
-        q = request.GET.get('q', '')
-        songs = Song.objects.filter(title__icontains=q)
-        albums = Album.objects.filter(title__icontains=q)
-        artists = Artist.objects.filter(name__icontains=q)
+        q = request.GET.get('q', '').strip()
+
+        if not q:
+            return Response({'songs': [], 'albums': [], 'artists': []})
+
+        songs = Song.objects.filter(title__icontains=q)[:10]
+        albums = Album.objects.filter(title__icontains=q)[:10]
+        artists = Artist.objects.filter(name__icontains=q)[:10]
 
         return Response({
-            'songs': SongSerializer(songs, many=True).data,
-            'albums': AlbumSerializer(albums, many=True).data,
-            'artists': ArtistSerializer(artists, many=True).data
+            'songs': SongSerializer(songs, many=True, context={'request': request}).data,
+            'albums': AlbumSerializer(albums, many=True, context={'request': request}).data,
+            'artists': ArtistSerializer(artists, many=True, context={'request': request}).data
         })
+
 class VideoSongsView(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
@@ -748,4 +942,31 @@ class UserAlbumViewSet(viewsets.ModelViewSet):
         songs = album.songs.all()  # Lấy tất cả bài hát trong album
         album_serializer = UserAlbumSerializer(album)
         return Response(album_serializer.data)
+
+
+class AdminUserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAdminUser]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return UserCreateSerializer
+        return UserSerializer
+
+
+class AdminDashboardStatsView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        stats = {
+            'total_users': User.objects.count(),
+            'total_songs': Song.objects.count(),
+            'total_albums': Album.objects.count(),
+            'total_artists': Artist.objects.count(),
+            'total_plays': sum(song.plays for song in Song.objects.all()),
+            'recent_users': UserSerializer(User.objects.order_by('-date_joined')[:5], many=True).data,
+            'popular_songs': SongSerializer(Song.objects.order_by('-plays')[:5], many=True).data
+        }
+        return Response(stats)
 

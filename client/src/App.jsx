@@ -3,6 +3,7 @@ import { useState } from "react"
 import Sidebar from "./components/Sidebar"
 import AppHeader from "./components/AppHeader"
 import Player from "./components/Player"
+import ChatBot from "./components/ChatBot"
 import AppRoutes from "./routes"
 import "./App.css"
 
@@ -19,6 +20,7 @@ function App() {
             <AppRoutes />
           </div>
         </main>
+      <ChatBot />
       </div>
       <Player />
     </div>

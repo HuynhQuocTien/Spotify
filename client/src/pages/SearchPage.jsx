@@ -1,225 +1,236 @@
 import { useState, useEffect } from 'react';
 import './SearchPage.css';
+import api from '../services/api';
+import { useMusicPlayer } from '../contexts/MusicPlayerContext';
+
 
 const SearchPage = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState(null);
-  const [categories, setCategories] = useState([]);
+  const [songs, setSongs] = useState([]); // State để lưu danh sách bài hát ban đầu
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
+  const [cancelTokenSource, setCancelTokenSource] = useState(null);
+  const { playSong, currentSong, isPlaying, favorites, updateFavorites } = useMusicPlayer();
 
   useEffect(() => {
-    // Load browse categories when the page loads
-    const fetchCategories = async () => {
+    // Load danh sách bài hát khi trang được tải
+    const fetchInitialSongs = async () => {
       try {
         setLoading(true);
-        // In a real app, this would be an API call
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        setCategories([
-          { id: 'pop', name: 'Pop', color: 'from-pink-500 to-purple-500' },
-          { id: 'hiphop', name: 'Hip-Hop', color: 'from-yellow-500 to-orange-500' },
-          { id: 'rock', name: 'Rock', color: 'from-red-500 to-pink-500' },
-          { id: 'indie', name: 'Indie', color: 'from-blue-500 to-indigo-500' },
-          { id: 'focus', name: 'Focus', color: 'from-green-500 to-teal-500' },
-          { id: 'electronic', name: 'Electronic', color: 'from-purple-500 to-blue-500' },
-          { id: 'rnb', name: 'R&B', color: 'from-red-500 to-yellow-500' },
-          { id: 'wellness', name: 'Wellness', color: 'from-teal-500 to-green-500' },
-          { id: 'latin', name: 'Latin', color: 'from-orange-500 to-red-500' },
-          { id: 'workout', name: 'Workout', color: 'from-blue-500 to-cyan-500' },
-          { id: 'party', name: 'Party', color: 'from-purple-500 to-pink-500' },
-          { id: 'sleep', name: 'Sleep', color: 'from-indigo-500 to-blue-500' },
-        ]);
-        
+        // Gọi API để lấy danh sách bài hát phổ biến
+        const response = await api.getSongs(); // Bạn cần thêm API này vào service
+
+        // Format dữ liệu tương tự như kết quả search
+        setSongs(response.data || []);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error('Error fetching initial songs:', error);
         setLoading(false);
       }
     };
-    
-    fetchCategories();
+
+    fetchInitialSongs();
   }, []);
 
   useEffect(() => {
-    // Search when query changes
+    if (cancelTokenSource) {
+      cancelTokenSource.cancel('Operation canceled due to new request');
+    }
+
+    const source = api.createCancelToken();
+    setCancelTokenSource(source);
     const searchTimeout = setTimeout(() => {
       if (query.trim().length > 1) {
-        performSearch();
+        performSearch(source.token);
       } else {
         setResults(null);
+        // Khi không có query, hiển thị lại danh sách bài hát ban đầu
+        if (songs.length > 0) {
+          setResults({ songs: { items: songs } });
+        }
       }
     }, 500);
 
-    return () => clearTimeout(searchTimeout);
-  }, [query]);
+    return () => {
+      clearTimeout(searchTimeout);
+      if (cancelTokenSource) {
+        cancelTokenSource.cancel('Operation canceled by component unmount');
+      }
+    };
+  }, [query, activeTab, songs]);
 
-  const performSearch = async () => {
+  const performSearch = async (cancelToken) => {
     try {
       setLoading(true);
-      // In a real app, this would be an API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Mock search results
-      setResults({
-        songs: {
-          items: [
-            {
-              id: 'song1',
-              name: 'Blinding Lights',
-              artists: [{ name: 'The Weeknd' }],
-              album: { 
-                name: 'After Hours',
-                images: [{ url: '/placeholder.svg?height=40&width=40' }]
-              },
-              duration_ms: 200000
-            },
-            {
-              id: 'song2',
-              name: 'Save Your Tears',
-              artists: [{ name: 'The Weeknd' }],
-              album: { 
-                name: 'After Hours',
-                images: [{ url: '/placeholder.svg?height=40&width=40' }]
-              },
-              duration_ms: 215000
-            },
-            {
-              id: 'song3',
-              name: 'Starboy',
-              artists: [{ name: 'The Weeknd', id: 'artist1' }, { name: 'Daft Punk', id: 'artist2' }],
-              album: { 
-                name: 'Starboy',
-                images: [{ url: '/placeholder.svg?height=40&width=40' }]
-              },
-              duration_ms: 230000
-            }
-          ]
-        },
-        artists: {
-          items: [
-            {
-              id: 'artist1',
-              name: 'The Weeknd',
-              images: [{ url: '/placeholder.svg?height=160&width=160' }]
-            },
-            {
-              id: 'artist2',
-              name: 'Daft Punk',
-              images: [{ url: '/placeholder.svg?height=160&width=160' }]
-            }
-          ]
-        },
-        albums: {
-          items: [
-            {
-              id: 'album1',
-              name: 'After Hours',
-              artists: [{ name: 'The Weeknd' }],
-              images: [{ url: '/placeholder.svg?height=160&width=160' }]
-            },
-            {
-              id: 'album2',
-              name: 'Starboy',
-              artists: [{ name: 'The Weeknd' }],
-              images: [{ url: '/placeholder.svg?height=160&width=160' }]
-            }
-          ]
-        },
-        playlists: {
-          items: [
-            {
-              id: 'playlist1',
-              name: 'This Is The Weeknd',
-              description: 'All his biggest hits and essential songs.',
-              images: [{ url: '/placeholder.svg?height=160&width=160' }]
-            }
-          ]
-        }
-      });
-      
+      const response = await api.search(query, cancelToken);
+      console.log('Search results:', response.data);
+      const formattedResults = {
+        songs: response.data.songs || [],
+        artists: response.data.artists || [],
+        albums: response.data.albums || []
+        
+      };
+      console.log('Formatted results:', formattedResults);
+      if (activeTab === 'songs') {
+        setResults({ songs: formattedResults.songs });
+      } else if (activeTab === 'artists') {
+        setResults({ artists: formattedResults.artists });
+      } else if (activeTab === 'albums') {
+        setResults({ albums: formattedResults.albums });
+      } else {
+        setResults(formattedResults);
+      }
+      console.log('Search results set:', results);
       setLoading(false);
     } catch (error) {
-      console.error('Error searching:', error);
-      setLoading(false);
+      if (!api.isCancel(error)) {
+        console.error('Error searching:', error);
+        setLoading(false);
+      }
     }
   };
 
-  // Update query from the header search input
-  useEffect(() => {
-    const searchInput = document.querySelector('.search-input');
-    if (searchInput && window.location.pathname === '/search') {
-      searchInput.focus();
-      
-      const handleSearchChange = (e) => {
-        setQuery(e.target.value);
-      };
-      
-      searchInput.addEventListener('input', handleSearchChange);
-      
-      return () => {
-        searchInput.removeEventListener('input', handleSearchChange);
-      };
+  const handlePlaySong = async (e, song) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+
+    if (!song.audio_file || loading) return;
+
+    try {
+      await playSong({
+        ...song,
+        audio: song.audio_file,
+      });
+    } catch (err) {
+      console.error('Playback failed:', err);
     }
-  }, []);
+  };
 
   return (
     <div className="search-page">
-      {!query && !results && (
-        <>
-          <h2 className="browse-title">Browse all</h2>
-          <div className="categories-grid">
-            {categories.map(category => (
-              <div 
-                key={category.id}
-                className={`category-item bg-gradient-to-br ${category.color}`}
-              >
-                <span className="category-name">{category.name}</span>
-              </div>
-            ))}
-          </div>
-        </>
+      <div className="search-header">
+        <input
+          type="text"
+          className="search-input"
+          placeholder="What do you want to listen to?"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          autoFocus
+        />
+      </div>
+
+      {query && (
+        <div className="search-tabs">
+          <button
+            className={`search-tab ${activeTab === 'all' ? 'active' : ''}`}
+            onClick={() => setActiveTab('all')}
+          >
+            All
+          </button>
+          <button
+            className={`search-tab ${activeTab === 'songs' ? 'active' : ''}`}
+            onClick={() => setActiveTab('songs')}
+          >
+            Songs
+          </button>
+          <button
+            className={`search-tab ${activeTab === 'artists' ? 'active' : ''}`}
+            onClick={() => setActiveTab('artists')}
+          >
+            Artists
+          </button>
+          <button
+            className={`search-tab ${activeTab === 'albums' ? 'active' : ''}`}
+            onClick={() => setActiveTab('albums')}
+          >
+            Albums
+          </button>
+        </div>
       )}
-      
+
       {loading && (
         <div className="search-loading">
           <div className="loading-spinner"></div>
         </div>
       )}
-      
+
+      {!query && !results && songs.length > 0 && (
+        <div className="search-results">
+          <div className="search-section">
+            <h2 className="search-section-title">Popular Songs</h2>
+            <div className="songs-list">
+              {songs.map((song, index) => (
+                <div key={song.id} className="song-item-s">
+                  <div className="song-number">{index + 1}</div>
+                  <img
+                    src={song.album?.cover_image}
+                    alt={song.title}
+                    className="song-image"
+                  />
+                  <div className="song-info">
+                    <span className="song-name">{song.title}</span>
+                    <span className="song-artist">
+                      {song.artists?.map(artist => artist.name).join(', ')}
+                    </span>
+                  </div>
+                  <div className="song-album">{song.album?.title}</div>
+                  <div className="song-duration">{song.duration}</div>
+                  <div className="song-popularity">
+                    <div className="popularity-bar" style={{ width: "20%" }}></div>
+                  </div>
+                  <button className="song-play-button">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M8 5.14v14l11-7-11-7z" fill="currentColor" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {results && !loading && (
         <div className="search-results">
-          {/* Top result */}
-          {(results.artists?.items.length > 0 || results.songs?.items.length > 0) && (
+          {/* Các phần hiển thị kết quả search giữ nguyên như trước */}
+          {activeTab === 'all' && (results.artists?.items.length > 0 || results.songs?.items.length > 0) && (
             <div className="search-section">
               <h2 className="search-section-title">Top result</h2>
               <div className="top-result">
-                {results.artists?.items[0] ? (
+                {results.artists[0] ? (
                   <div className="top-result-artist">
-                    <img 
-                      src={results.artists.items[0].images[0].url || "/placeholder.svg"} 
-                      alt={results.artists.items[0].name}
+                    <img
+                      src={results.artists.cover_image}
+                      alt={results.artists.name}
                       className="top-result-image"
                     />
-                    <h3 className="top-result-name">{results.artists.items[0].name}</h3>
+                    <h3 className="top-result-name">{results.artists.name}</h3>
                     <span className="top-result-type">Artist</span>
-                    <button className="play-button">
+                    <span className="top-result-followers">
+                      12 followers
+                    </span>
+                    <button className="song-play-button">
                       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M8 5.14v14l11-7-11-7z" fill="currentColor" />
                       </svg>
                     </button>
                   </div>
-                ) : results.songs?.items[0] ? (
+                ) : results.songs ? (
                   <div className="top-result-song">
-                    <img 
-                      src={results.songs.items[0].album.images[0].url || "/placeholder.svg"} 
-                      alt={results.songs.items[0].name}
+                    <img
+                      src={results.songs.album?.cover_image}
+                      alt={results.songstitle}
                       className="top-result-image"
                     />
-                    <h3 className="top-result-name">{results.songs.items[0].name}</h3>
+                    <h3 className="top-result-name">{results.songs.album?.title}  </h3>
                     <span className="top-result-artist">
-                      {results.songs.items[0].artists.map(artist => artist.name).join(', ')}
+                    {results.songs.artists?.map(artist => artist.name).join(', ')}
                     </span>
-                    <button className="play-button">
+                    <span className="top-result-popularity">
+                      Popularity: 50/100
+                    </span>
+                    <button className="song-play-button">
                       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M8 5.14v14l11-7-11-7z" fill="currentColor" />
                       </svg>
@@ -229,24 +240,30 @@ const SearchPage = () => {
               </div>
             </div>
           )}
-          
-          {/* Songs */}
-          {results.songs?.items.length > 0 && (
+
+          {(activeTab === 'all' || activeTab === 'songs') && results.songs?.length > 0 && (
             <div className="search-section">
               <h2 className="search-section-title">Songs</h2>
               <div className="songs-list">
-                {results.songs.items.map(song => (
-                  <div key={song.id} className="song-item">
-                    <img 
-                      src={song.album.images[0].url || "/placeholder.svg"} 
-                      alt={song.name}
+                {results.songs.map((song, index) => (
+                  <div key={song.id} className="song-item-s"
+                  onClick={(e) => handlePlaySong(e, song)}>
+                    <div className="song-number">{index + 1}</div>
+                    <img
+                      src={song.image}
+                      alt={song.title}
                       className="song-image"
                     />
                     <div className="song-info">
-                      <span className="song-name">{song.name}</span>
+                      <span className="song-name">{song.title}</span>
                       <span className="song-artist">
-                        {song.artists.map(artist => artist.name).join(', ')}
+                        {song.artists?.map(artist => artist.name).join(', ')}
                       </span>
+                    </div>
+                    <div className="song-album">{song.album?.title}</div>
+                    <div className="song-duration">{song.duration}</div>
+                    <div className="song-popularity">
+                      <div className="popularity-bar" style={{ width: "20%"}}></div>
                     </div>
                     <button className="song-play-button">
                       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -258,80 +275,10 @@ const SearchPage = () => {
               </div>
             </div>
           )}
-          
-          {/* Artists */}
-          {results.artists?.items.length > 0 && (
-            <div className="search-section">
-              <h2 className="search-section-title">Artists</h2>
-              <div className="search-grid">
-                {results.artists.items.map(artist => (
-                  <div key={artist.id} className="search-grid-item">
-                    <div className="search-grid-image-container">
-                      <img 
-                        src={artist.images[0].url || "/placeholder.svg"} 
-                        alt={artist.name}
-                        className="search-grid-image artist-image"
-                      />
-                    </div>
-                    <h3 className="search-grid-name">{artist.name}</h3>
-                    <span className="search-grid-type">Artist</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {/* Albums */}
-          {results.albums?.items.length > 0 && (
-            <div className="search-section">
-              <h2 className="search-section-title">Albums</h2>
-              <div className="search-grid">
-                {results.albums.items.map(album => (
-                  <div key={album.id} className="search-grid-item">
-                    <div className="search-grid-image-container">
-                      <img 
-                        src={album.images[0].url || "/placeholder.svg"} 
-                        alt={album.name}
-                        className="search-grid-image"
-                      />
-                    </div>
-                    <h3 className="search-grid-name">{album.name}</h3>
-                    <span className="search-grid-type">
-                      {album.artists.map(artist => artist.name).join(', ')}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {/* Playlists */}
-          {results.playlists?.items.length > 0 && (
-            <div className="search-section">
-              <h2 className="search-section-title">Playlists</h2>
-              <div className="search-grid">
-                {results.playlists.items.map(playlist => (
-                  <div key={playlist.id} className="search-grid-item">
-                    <div className="search-grid-image-container">
-                      <img 
-                        src={playlist.images[0].url || "/placeholder.svg"} 
-                        alt={playlist.name}
-                        className="search-grid-image"
-                      />
-                    </div>
-                    <h3 className="search-grid-name">{playlist.name}</h3>
-                    <span className="search-grid-type">{playlist.description}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {/* No results */}
-          {!results.songs?.items.length &&
-            !results.artists?.items.length &&
-            !results.albums?.items.length &&
-            !results.playlists?.items.length && (
+
+          {!results.songs?.length &&
+            !results.artists?.length &&
+            !results.albums?.length && (
               <div className="no-results">
                 <h2>No results found for "{query}"</h2>
                 <p>Please check your spelling or try different keywords.</p>

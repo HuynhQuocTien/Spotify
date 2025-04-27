@@ -6,10 +6,10 @@ from . import views
 from .views import (
     GenreViewSet, ArtistViewSet, AlbumViewSet,
     SongViewSet, PlaylistViewSet, UserProfileView,
-    CustomTokenObtainPairView, RegisterView, ChatAPI,
+    CustomTokenObtainPairView, RegisterView,
     ForgotPasswordView, VerifyOTPView, ResetPasswordView,
     PlaylistSongsView, AlbumSongsView, ArtistTopSongsView, SearchView, StreamVideoView, DownloadVideoView,
-    VideoViewSet, UserAlbumViewSet
+    VideoViewSet, UserAlbumViewSet, SmartSearchView, AdminDashboardStatsView
 )
 
 router = DefaultRouter()
@@ -17,7 +17,6 @@ router.register(r'genres', GenreViewSet)
 router.register(r'artists', ArtistViewSet)
 router.register(r'albums', AlbumViewSet)
 router.register(r'songs', SongViewSet)
-router.register(r'playlists', PlaylistViewSet)
 router.register(r'videos', VideoViewSet)
 router.register(r'user-albums', UserAlbumViewSet, basename='user-album')
 
@@ -25,6 +24,8 @@ router.register(r'user-albums', UserAlbumViewSet, basename='user-album')
 urlpatterns = [
     # Router URLs
     path('', include(router.urls)),
+
+    path('admin/stats/', AdminDashboardStatsView.as_view(), name='admin-stats'),
 
     # Authentication
     path('auth/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -67,5 +68,5 @@ urlpatterns = [
 
     # Others
     path('search/', SearchView.as_view(), name='search'),
-    path('chat/', ChatAPI.as_view(), name='chat-api'),
+    path('smart-search/', SmartSearchView.as_view(), name='smart-search'),
 ]
