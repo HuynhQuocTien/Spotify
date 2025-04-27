@@ -75,7 +75,7 @@ export default function ChatBot() {
     } catch (error) {
       setMessages((prev) => [
         ...prev,
-        { text: "Xin lỗi, hiện tại tôi gặp sự cố. Vui lòng thử lại sau.", sender: 'bot' },
+        { text: "Xin lỗi, tôi không tìm được từ khóa mà bạn cho tôi.", sender: 'bot' },
       ]);
     } finally {
       setIsLoading(false);

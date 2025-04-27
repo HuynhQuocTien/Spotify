@@ -156,6 +156,43 @@ class SmartSearchView(APIView):
         - search_type: Chỉ được chọn 1 trong 3 giá trị (song, album, artist)
         - parameters: Chứa các trường phù hợp với từng loại
         - Nếu không thể xác định được loại tìm kiếm rõ ràng, hãy trả về null cho search_type
+        - Chỉ thêm trường quantity nếu người dùng đề cập đến một số lượng cụ thể
+
+        Ví dụ khi phân tích "Kiếm cho tôi nhạc của Sơn Tùng MTP":
+        {{
+            "search_type": "song",
+            "parameters": {{
+                "artist": "Sơn Tùng MTP"
+            }}
+        }}
+        Hoặc là ví dụ khi phân tích "Kiếm cho tôi 2 bài (bài nhạc) của chạy ngay đi":
+        {{
+            "search_type": "song",
+            "parameters": {{
+                "title": "chạy ngay đi"
+            }}
+        }}
+        Hoặc là ví dụ khi phân tích "tìm cho tôi 2 bài (bài nhạc) của Sơn Tùng MTP":
+        {{
+            "search_type": "song",
+            "parameters": {{
+                "artist": "Sơn Tùng MTP"
+            }}
+        }}
+        Hoặc là ví dụ khi phân tích "tôi muốn nghe nhạc của sơn tùng mtp":
+        {{
+            "search_type": "artist",
+            "parameters": {{
+                "name": "sơn tùng mtp""
+            }}
+        }}
+        Hoặc là ví dụ khi phân tích "tôi muốn xem album tình yêu không màu":
+        {{
+            "search_type": "album",
+            "parameters": {{
+                "album": "tình yêu không màu""
+            }}
+        }}
         """
 
         try:
@@ -191,7 +228,7 @@ class SmartSearchView(APIView):
         except Exception as e:
             raise ValueError(f"Lỗi khi phân tích truy vấn: {str(e)}")
 
-    def search_songs(self, params):
+    def search_songs(self, params, limit=10):
         """Search songs based on extracted parameters"""
         query_obj = Q()
 
@@ -210,9 +247,9 @@ class SmartSearchView(APIView):
             query_obj |= Q(lyrics__icontains=params["query"])
             query_obj |= Q(artist__name__icontains=params["query"])
 
-        return Song.objects.filter(query_obj).distinct()[:10]
+        return Song.objects.filter(query_obj).distinct()[:limit]
 
-    def search_albums(self, params):
+    def search_albums(self, params, limit=10):
         """Search albums based on extracted parameters"""
         query_obj = Q()
 
@@ -230,9 +267,9 @@ class SmartSearchView(APIView):
             query_obj |= Q(name__icontains=params["query"])
             query_obj |= Q(artist__name__icontains=params["query"])
 
-        return Album.objects.filter(query_obj).distinct()[:10]
+        return Album.objects.filter(query_obj).distinct()[:limit]
 
-    def search_artists(self, params):
+    def search_artists(self, params, limit=10):
         """Search artists based on extracted parameters"""
         query_obj = Q()
 
@@ -250,7 +287,8 @@ class SmartSearchView(APIView):
             query_obj |= Q(name__icontains=params["query"])
             query_obj |= Q(bio__icontains=params["query"])
 
-        return Artist.objects.filter(query_obj).distinct()[:10]
+        return Artist.objects.filter(query_obj).distinct()[:limit]
+
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer

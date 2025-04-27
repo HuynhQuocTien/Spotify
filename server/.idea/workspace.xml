@@ -5,27 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7784712c-c114-4f41-843e-ce3b0b975991" name="Changes" comment="feat: Add songs field to UserAlbumSerializer and include song data in response when adding a song to an album">
-      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../client/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../client/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/components/AppHeader.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/AppHeader.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/components/Sidebar.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Sidebar.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/components/Sidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Sidebar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/ArtistPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/ArtistPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/HomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/HomePage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/LibraryPage.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/LibraryPage.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/SearchPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/SearchPage.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/pages/SearchPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/SearchPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/routes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/routes.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/src/services/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/services/api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/components/ChatBot.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/ChatBot.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/music/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/music/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/music/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -159,7 +141,7 @@
       <workItem from="1745728369134" duration="985000" />
       <workItem from="1745729444255" duration="5547000" />
       <workItem from="1745755760667" duration="4273000" />
-      <workItem from="1745768603345" duration="13754000" />
+      <workItem from="1745768603345" duration="15087000" />
     </task>
     <task id="LOCAL-00001" summary="init server">
       <option name="closed" value="true" />
