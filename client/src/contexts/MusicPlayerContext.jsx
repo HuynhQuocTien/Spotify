@@ -94,8 +94,7 @@ export const MusicPlayerProvider = ({ children }) => {
         setError(null)
   
         audioRef.current.src = currentSong.audio || currentSong.preview_url || ""
-  
-        // Không cần await load()
+
         audioRef.current.load()
   
         if (isPlaying) {
@@ -141,7 +140,6 @@ export const MusicPlayerProvider = ({ children }) => {
     if (!currentSong) return
     setIsPlaying((prev) => !prev)
   }
-  // Player controls
   const playSong = useCallback(async (song, songs = []) => {
     if (!user) {
       showLogin() // Hiển thị modal đăng nhập nếu chưa đăng nhập

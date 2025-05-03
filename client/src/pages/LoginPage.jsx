@@ -6,10 +6,9 @@ import "./LoginPage.css"
 import api from "../services/api" // Import API service
 import { useAuth } from "../contexts/AuthContext"
 
-
 const LoginPage = ({ onClose }) => {
   const { login } = useAuth()
-  const [view, setView] = useState('login'); // 'login' | 'signup' | 'forgot' | 'otp' | 'reset'
+  const [view, setView] = useState('login'); // 'login' | 'signup' | 'forgot' | 'otp' | 'reset' | 'success'
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -20,6 +19,7 @@ const LoginPage = ({ onClose }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -33,40 +33,30 @@ const LoginPage = ({ onClose }) => {
     setError('');
 
     try {
-      // Xử lý submit tùy theo view hiện tại
       switch (view) {
         case 'login':
-          // Xử lý đăng nhập
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          navigate('/');
+          await handleLogin(e);
           break;
         case 'signup':
-          // Xử lý đăng ký
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          setView('otp');
+          await handleSignup();
           break;
         case 'forgot':
-          // Gửi yêu cầu quên mật khẩu
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          setView('otp');
+          await handleForgotPassword();
           break;
         case 'otp':
-          // Xác thực OTP
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          setView('reset');
+          await handleVerifyOTP();
           break;
         case 'reset':
-          // Đặt lại mật khẩu
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          setView('login');
+          await handleResetPassword();
           break;
       }
     } catch (err) {
-      setError('Có lỗi xảy ra. Vui lòng thử lại.');
+      setError(err.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
   };
+
   const handleLogin = async (e) => {
     e.preventDefault()
     setLoading(true)
@@ -91,21 +81,21 @@ const LoginPage = ({ onClose }) => {
         email: formData.email,
         password: formData.password
       })
-      setView('otp')
+      setSuccessMessage('Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.')
+      setView('success')
     } catch (err) {
       setError(err.response?.data?.detail || 'Đăng ký thất bại')
     } finally {
       setLoading(false)
     }
   }
+
   const handleForgotPassword = async () => {
     setLoading(true);
     setError('');
     try {
-      // Gọi API gửi yêu cầu quên mật khẩu
       const response = await api.forgotPassword({ email: formData.email });
       if (response.status === 200) {
-        // Chuyển hướng về trang xác thực OTP
         setView('otp');
       } else {
         setError('Có lỗi xảy ra. Vui lòng thử lại.');
@@ -116,15 +106,18 @@ const LoginPage = ({ onClose }) => {
       setLoading(false);
     }
   };
+
   const handleResetPassword = async () => {
     setLoading(true);
     setError('');
     try {
-      // Gọi API đặt lại mật khẩu
-      const response = await api.resetPassword({ newPassword: formData.newPassword, confirmPassword: formData.confirmPassword });
+      const response = await api.resetPassword({ 
+        newPassword: formData.newPassword, 
+        confirmPassword: formData.confirmPassword 
+      });
       if (response.status === 200) {
-        // Chuyển hướng về trang đăng nhập
-        setView('login');
+        setSuccessMessage('Đặt lại mật khẩu thành công! Bạn có thể đăng nhập ngay bây giờ.')
+        setView('success');
       } else {
         setError('Có lỗi xảy ra. Vui lòng thử lại.');
       }
@@ -134,14 +127,13 @@ const LoginPage = ({ onClose }) => {
       setLoading(false);
     }
   };
+
   const handleVerifyOTP = async () => {
     setLoading(true);
     setError('');
     try {
-      // Gọi API xác thực OTP
       const response = await api.verifyOTP({ otp: formData.otp });
       if (response.status === 200) {
-        // Chuyển hướng về trang đặt lại mật khẩu
         setView('reset');
       } else {
         setError('Có lỗi xảy ra. Vui lòng thử lại.');
@@ -152,14 +144,13 @@ const LoginPage = ({ onClose }) => {
       setLoading(false);
     }
   };
+
   const handleResendOTP = async () => {
     setLoading(true);
     setError('');
     try {
-      // Gọi API gửi lại mã OTP
       const response = await api.resendOTP({ email: formData.email });
       if (response.status === 200) {
-        // Hiển thị thông báo gửi lại mã thành công
         setError('Mã OTP đã được gửi lại đến email của bạn.');
       } else {
         setError('Có lỗi xảy ra. Vui lòng thử lại.');
@@ -170,6 +161,7 @@ const LoginPage = ({ onClose }) => {
       setLoading(false);
     }
   };
+
   const handleClose = () => {
     setView('login');
     setFormData({
@@ -182,14 +174,15 @@ const LoginPage = ({ onClose }) => {
     });
     setLoading(false);
     setError('');
+    setSuccessMessage('');
     onClose();
   };
+
   const handleBack = () => {
     switch (view) {
       case 'signup':
-        setView('login');
-        break;
       case 'forgot':
+      case 'success':
         setView('login');
         break;
       case 'otp':
@@ -250,7 +243,7 @@ const LoginPage = ({ onClose }) => {
                 </a>
               </div>
 
-              <button type="submit" className="primary-button" disabled={loading} onClick={handleLogin}>
+              <button type="submit" className="primary-button" disabled={loading}>
                 {loading ? 'Đang xử lý...' : 'Đăng nhập'}
               </button>
             </form>
@@ -309,8 +302,8 @@ const LoginPage = ({ onClose }) => {
                 />
               </div>
 
-              <button type="submit" className="primary-button" disabled={loading} onClick={handleSignup}>
-                {loading ? 'Đang xử lý...' : 'Tiếp tục'}
+              <button type="submit" className="primary-button" disabled={loading}>
+                {loading ? 'Đang xử lý...' : 'Đăng ký'}
               </button>
             </form>
 
@@ -322,6 +315,21 @@ const LoginPage = ({ onClose }) => {
             >
               Đã có tài khoản? Đăng nhập
             </a>
+          </>
+        );
+
+      case 'success':
+        return (
+          <>
+            <h2 className="modal-title">Thành công!</h2>
+            <div className="success-message">{successMessage}</div>
+            
+            <button 
+              className="primary-button"
+              onClick={() => setView('login')}
+            >
+              Quay lại đăng nhập
+            </button>
           </>
         );
 
@@ -344,7 +352,7 @@ const LoginPage = ({ onClose }) => {
                 />
               </div>
 
-              <button type="submit" className="primary-button" disabled={loading} onClick={handleForgotPassword}>
+              <button type="submit" className="primary-button" disabled={loading}>
                 {loading ? 'Đang xử lý...' : 'Gửi yêu cầu'}
               </button>
             </form>
@@ -379,7 +387,7 @@ const LoginPage = ({ onClose }) => {
                 />
               </div>
 
-              <button type="submit" className="primary-button" disabled={loading} onClick={handleVerifyOTP}>
+              <button type="submit" className="primary-button" disabled={loading}>
                 {loading ? 'Đang xác thực...' : 'Xác thực'}
               </button>
             </form>
@@ -422,7 +430,7 @@ const LoginPage = ({ onClose }) => {
                 />
               </div>
 
-              <button type="submit" className="primary-button" disabled={loading} onClick={handleResetPassword}>
+              <button type="submit" className="primary-button" disabled={loading}>
                 {loading ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
               </button>
             </form>
@@ -434,7 +442,7 @@ const LoginPage = ({ onClose }) => {
   return (
     <div className="login-modal">
       <div className="login-container">
-        <button className="close-button" onClick={onClose}>
+        <button className="close-button" onClick={handleClose}>
           <svg viewBox="0 0 24 24" width="24" height="24">
             <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
           </svg>
