@@ -14,6 +14,7 @@ const HomePage = () => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [error, setError] = useState(null)
   const [cssLoaded, setCssLoaded] = useState(false);
+  const [activeTab, setActiveTab] = useState("all")
 
   useEffect(() => {
     import("./HomePage.css").then(() => {
@@ -61,7 +62,6 @@ const HomePage = () => {
       description: `By ${Array.isArray(video.artists) && video.artists.length > 0 ? video.artists.join(", ") : "Unknown"}`
     })
 
-    // Fetch data
     const fetchData = async () => {
       try {
         setIsLoaded(true)
@@ -125,6 +125,7 @@ const HomePage = () => {
           title="Featured Videos"
           items={videos}
           seeAllLink="/browse/videos"
+          showNavigation={true}
         />
       )}
 
@@ -133,6 +134,7 @@ const HomePage = () => {
           title="Top Songs"
           items={songs}
           seeAllLink="/browse/songs"
+          showNavigation={true}
         />
       )}
 
@@ -143,6 +145,7 @@ const HomePage = () => {
           title="New Albums"
           items={albums}
           seeAllLink="/browse/albums"
+          showNavigation={true}
         />
       )}
       
@@ -151,6 +154,7 @@ const HomePage = () => {
           title="Popular Artists"
           items={artists}
           seeAllLink="/browse/artists"
+          showNavigation={true}
         />
       )}
 

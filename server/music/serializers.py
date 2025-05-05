@@ -329,12 +329,10 @@ class SongCreateSerializer(serializers.ModelSerializer):
         except Album.DoesNotExist:
             raise serializers.ValidationError("Album not found")
 
-        # Kiểm tra quyền sở hữu
         user = self.context['request'].user
         if album.created_by != user:
             raise serializers.ValidationError("You don't have permission to add songs to this album")
 
-        # Xóa trường không cần thiết
         if 'duration_str' in validated_data:
             validated_data.pop('duration_str')
 
@@ -386,7 +384,7 @@ class UserAlbumSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'title', 'description', 'cover_image', 'songs', 'created_at']
         read_only_fields = ['user', 'created_at']
         extra_kwargs = {
-            'songs': {'required': False}  # Cho phép tạo album không cần songs
+            'songs': {'required': False}
         }
 
 class UserCreateSerializer(serializers.ModelSerializer):

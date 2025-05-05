@@ -296,3 +296,75 @@
 .section-item:hover .item-image-container::after {
   opacity: 1;
 }
+
+/* Section navigation */
+.section-content-wrapper {
+  position: relative;
+}
+
+.section-nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  background-color: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.section:hover .section-nav-button {
+  opacity: 1;
+}
+
+.section-nav-button.left {
+  left: 10px;
+}
+
+.section-nav-button.right {
+  right: 10px;
+}
+
+.section-nav-button svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+.section-nav-button:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Scrollable sections */
+.section-items {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  gap: 20px;
+  padding: 10px 0;
+}
+
+.section-items::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.section-item {
+  flex: 0 0 auto;
+  width: 200px;
+  transition: transform 0.2s ease;
+}
+
+.section-item:hover {
+  transform: scale(1.05);
+}

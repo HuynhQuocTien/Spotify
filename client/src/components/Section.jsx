@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState,useRef } from "react"
 import { Link } from "react-router-dom"
 import { useMusicPlayer } from "../contexts/MusicPlayerContext"
-import { useAuth } from "../contexts/AuthContext" // Giả sử bạn có AuthContext
+import { useAuth } from "../contexts/AuthContext"
 import "./Section.css"
 import api, { getMediaUrl } from "../services/api"
 
@@ -12,13 +12,31 @@ const Section = ({
   items = [],
   seeAllLink,
   type = "grid",
-  limit = 6,
-  showPlayButton = true
+  limit = 12,
+  showPlayButton = true,
+  showNavigation = true 
 }) => {
   const { playSong, currentSong, isPlaying, togglePlay } = useMusicPlayer()
   const { user, showLogin } = useAuth()
   const [hoveredItem, setHoveredItem] = useState(null)
   const [expandedAlbum, setExpandedAlbum] = useState(null)
+  const scrollContainerRef = useRef(null)
+
+  const scroll = (direction) => {
+    const container = scrollContainerRef.current
+    if (!container) return
+  
+    const scrollAmount = 300
+    const newScrollPosition = direction === 'left'
+      ? container.scrollLeft - scrollAmount
+      : container.scrollLeft + scrollAmount
+  
+    container.scrollTo({
+      left: newScrollPosition,
+      behavior: 'smooth'
+    })
+  }
+  
   const handlePlayClick = async (e, item) => {
     e.preventDefault()
     e.stopPropagation()
@@ -27,8 +45,6 @@ const Section = ({
       showLogin()
       return
     }
-
-
     try {
       let songs = []
       let contextUri = null
@@ -148,6 +164,18 @@ const Section = ({
           </Link>
         )}
       </div>
+       <div className="section-content-wrapper">
+        {showNavigation && items.length > limit && (
+          <button 
+            className="section-nav-button left"
+            onClick={() => scroll('left')}
+            aria-label="Scroll left"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/>
+            </svg>
+          </button>
+        )}
 
       {type === 'songlist' ? (
         <div className="album-songlist">
@@ -212,7 +240,9 @@ const Section = ({
           ))}
         </div>
       ) : (
-        <div className={`section-items ${type}`}>
+        <div
+          ref={scrollContainerRef}
+         className={`section-items ${type}`}>
           {displayedItems.map((item) => (
             <Link
               key={item.id}
@@ -276,6 +306,18 @@ const Section = ({
           ))}
         </div>
       )}
+        {showNavigation && items.length > limit && (
+          <button 
+            className="section-nav-button right"
+            onClick={() => scroll('right')}
+            aria-label="Scroll right"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+            </svg>
+          </button>
+        )}
+      </div>
     </section>
   )
 }

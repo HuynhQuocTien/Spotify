@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7784712c-c114-4f41-843e-ce3b0b975991" name="Changes" comment="feat: Add songs field to UserAlbumSerializer and include song data in response when adding a song to an album" />
+    <list default="true" id="7784712c-c114-4f41-843e-ce3b0b975991" name="Changes" comment="feat: Add songs field to UserAlbumSerializer and include song data in response when adding a song to an album">
+      <change beforePath="$PROJECT_DIR$/../client/src/components/Section.css" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Section.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/components/Section.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/components/Section.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/pages/HomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../client/src/pages/HomePage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/music/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/music/serializers.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -142,7 +149,10 @@
       <workItem from="1745798672977" duration="1792000" />
       <workItem from="1745801467920" duration="1370000" />
       <workItem from="1746268080293" duration="1000" />
-      <workItem from="1746269172141" duration="5465000" />
+      <workItem from="1746269172141" duration="5677000" />
+      <workItem from="1746391165322" duration="614000" />
+      <workItem from="1746392546007" duration="2590000" />
+      <workItem from="1746403191623" duration="1905000" />
     </task>
     <task id="LOCAL-00001" summary="init server">
       <option name="closed" value="true" />
